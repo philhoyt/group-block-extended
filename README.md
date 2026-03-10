@@ -1,6 +1,6 @@
 # Group Block Extended
 
-A WordPress plugin that extends the core Group block with aspect ratio control and linked group functionality — non-destructively, via filter hooks.
+A WordPress plugin that extends the core Group block with aspect ratio control and linked group functionality.
 
 ## Features
 

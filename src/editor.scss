@@ -27,6 +27,17 @@
 	}
 }
 
+// Toolbar link popover — wraps the inline LinkControl.
+.gbe-toolbar-link-popover {
+	padding: 8px;
+	min-width: 280px;
+	max-width: 350px;
+
+	.block-editor-link-control {
+		box-shadow: none;
+	}
+}
+
 // Query Loop post URL preview shown below the "Link to post" toggle.
 .gbe-post-url-preview {
 	margin: -4px 0 12px;

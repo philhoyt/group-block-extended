@@ -8,6 +8,7 @@
     "lint:js": "wp-scripts lint-js"
   },
   "devDependencies": {
+    "@wordpress/icons": "^11.8.0",
     "@wordpress/scripts": "^30.0.0"
   }
 }

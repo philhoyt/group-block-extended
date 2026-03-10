@@ -5,6 +5,7 @@ import { cloneElement, createElement } from '@wordpress/element';
 
 import AspectRatioControl from './components/AspectRatioControl';
 import LinkedGroupControl from './components/LinkedGroupControl';
+import LinkedGroupToolbar from './components/LinkedGroupToolbar';
 
 import './editor.scss';
 
@@ -26,6 +27,10 @@ addFilter(
 				return (
 					<>
 						<BlockEdit { ...props } />
+						<LinkedGroupToolbar
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
 						<InspectorControls>
 							<AspectRatioControl
 								clientId={ clientId }
@@ -98,6 +103,7 @@ addFilter(
 			groupLinkNewTab,
 			groupLinkRel,
 			groupLinkAriaLabel,
+			groupLinkTitle,
 			groupLinkToPost,
 		} = attributes;
 
@@ -134,6 +140,7 @@ addFilter(
 			if ( groupLinkNewTab )        linkProps.target    = '_blank';
 			if ( relParts.length )        linkProps.rel       = relParts.join( ' ' );
 			if ( groupLinkAriaLabel )     linkProps[ 'aria-label' ] = groupLinkAriaLabel;
+			if ( groupLinkTitle )         linkProps.title     = groupLinkTitle;
 
 			modifiedElement = createElement( 'a', linkProps, modifiedElement );
 		}

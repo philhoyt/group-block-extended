@@ -30,6 +30,7 @@ add_filter( 'block_type_metadata', function ( array $metadata ): array {
 			'groupLinkNewTab'    => [ 'type' => 'boolean', 'default' => false ],
 			'groupLinkRel'       => [ 'type' => 'string',  'default' => '' ],
 			'groupLinkAriaLabel' => [ 'type' => 'string',  'default' => '' ],
+			'groupLinkTitle'     => [ 'type' => 'string',  'default' => '' ],
 			'groupLinkToPost'    => [ 'type' => 'boolean', 'default' => false ],
 		]
 	);
@@ -140,9 +141,10 @@ add_filter( 'render_block_core/group', function ( string $block_content, array $
 	// Strip nested anchors from inner content before wrapping.
 	$block_content = group_block_extended_strip_nested_anchors( $block_content, false );
 
-	$link_new_tab = ! empty( $attrs['groupLinkNewTab'] );
-	$link_rel     = sanitize_text_field( $attrs['groupLinkRel'] ?? '' );
-	$link_aria    = $attrs['groupLinkAriaLabel'] ?? '';
+	$link_new_tab  = ! empty( $attrs['groupLinkNewTab'] );
+	$link_rel      = sanitize_text_field( $attrs['groupLinkRel'] ?? '' );
+	$link_aria     = $attrs['groupLinkAriaLabel'] ?? '';
+	$link_title    = sanitize_text_field( $attrs['groupLinkTitle'] ?? '' );
 
 	// Default aria-label to post title in Query Loop context.
 	if ( $link_aria === '' ) {
@@ -167,8 +169,9 @@ add_filter( 'render_block_core/group', function ( string $block_content, array $
 	$target_attr = $link_new_tab ? ' target="_blank"' : '';
 	$rel_attr    = $rel_attr !== '' ? ' rel="' . esc_attr( $rel_attr ) . '"' : '';
 	$aria_attr   = $link_aria !== '' ? ' aria-label="' . esc_attr( $link_aria ) . '"' : '';
+	$title_attr  = $link_title !== '' ? ' title="' . esc_attr( $link_title ) . '"' : '';
 
-	$link_open  = '<a href="' . esc_url( $permalink ) . '" class="wp-block-group-link"' . $target_attr . $rel_attr . $aria_attr . '>';
+	$link_open  = '<a href="' . esc_url( $permalink ) . '" class="wp-block-group-link"' . $target_attr . $rel_attr . $aria_attr . $title_attr . '>';
 	$link_close = '</a>';
 
 	$link_depth++;

@@ -11,6 +11,7 @@ export default function LinkedGroupControl( { clientId, attributes, setAttribute
 		groupLinkNewTab,
 		groupLinkRel,
 		groupLinkAriaLabel,
+		groupLinkTitle,
 		groupLinkToPost,
 	} = attributes;
 
@@ -80,6 +81,7 @@ export default function LinkedGroupControl( { clientId, attributes, setAttribute
 			groupLinkUrl:    '',
 			groupLinkNewTab: false,
 			groupLinkToPost: false,
+			groupLinkTitle:  '',
 		} );
 	}
 
@@ -165,6 +167,16 @@ export default function LinkedGroupControl( { clientId, attributes, setAttribute
 									'group-block-extended'
 								) }
 								onChange={ ( value ) => setAttributes( { groupLinkAriaLabel: value } ) }
+							/>
+
+							<TextControl
+								label={ __( 'Title attribute', 'group-block-extended' ) }
+								value={ groupLinkTitle }
+								help={ __(
+									'Shown as a tooltip on hover in most browsers.',
+									'group-block-extended'
+								) }
+								onChange={ ( value ) => setAttributes( { groupLinkTitle: value } ) }
 							/>
 
 							<TextControl

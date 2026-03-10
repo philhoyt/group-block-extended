@@ -1,0 +1,13 @@
+{
+  "name": "group-block-extended",
+  "version": "1.0.0",
+  "description": "WordPress plugin that extends the core Group block with aspect ratio and linked group features",
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start",
+    "lint:js": "wp-scripts lint-js"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.0.0"
+  }
+}

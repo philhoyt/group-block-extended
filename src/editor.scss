@@ -1,0 +1,55 @@
+// Group Block Extended — Editor Styles
+
+// Linked Group badge: shown inside the block wrapper in the editor to indicate
+// the group is linked. The block is NOT wrapped in <a> in the editor canvas.
+.wp-block-group {
+	&.is-group-linked {
+		position: relative;
+
+		// Badge indicator — injected by the BlockEdit HOC when a link is set.
+		&::before {
+			content: "Linked";
+			position: absolute;
+			top: 4px;
+			right: 4px;
+			z-index: 10;
+			padding: 2px 6px;
+			background: var( --wp-admin-theme-color, #007cba );
+			color: #fff;
+			font-size: 10px;
+			font-weight: 600;
+			line-height: 1.6;
+			border-radius: 2px;
+			pointer-events: none;
+			text-transform: uppercase;
+			letter-spacing: 0.05em;
+		}
+	}
+}
+
+// Constrain LinkControl within the inspector panel.
+.gbe-link-control-wrapper {
+	overflow: hidden;
+
+	.block-editor-link-control {
+		width: 100%;
+		max-width: 100%;
+		min-width: 0;
+		box-shadow: none;
+		border: 1px solid #ddd;
+		border-radius: 2px;
+		margin-bottom: 8px;
+		box-sizing: border-box;
+	}
+
+	// Input row and all children must not escape the panel width.
+	.block-editor-link-control__search-input,
+	.block-editor-link-control__search-item,
+	.block-editor-link-control__settings,
+	.components-base-control,
+	input[type="text"] {
+		max-width: 100%;
+		min-width: 0;
+		box-sizing: border-box;
+	}
+}

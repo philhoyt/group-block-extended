@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Register custom attributes on core/group via block_type_metadata filter.
+ * Register custom attributes and context on core/group via block_type_metadata filter.
  */
 add_filter( 'block_type_metadata', function ( array $metadata ): array {
 	if ( ( $metadata['name'] ?? '' ) !== 'core/group' ) {
@@ -33,6 +33,13 @@ add_filter( 'block_type_metadata', function ( array $metadata ): array {
 			'groupLinkToPost'    => [ 'type' => 'boolean', 'default' => false ],
 		]
 	);
+
+	// Needed so the editor passes postId/postType context into the block,
+	// enabling the Query Loop URL preview via useEntityProp.
+	$metadata['usesContext'] = array_unique( array_merge(
+		$metadata['usesContext'] ?? [],
+		[ 'queryId', 'postId', 'postType' ]
+	) );
 
 	return $metadata;
 } );
@@ -80,11 +87,11 @@ add_action( 'wp_enqueue_scripts', function (): void {
  * Server-side render filter for core/group.
  *
  * Handles:
- * 1. groupLinkToPost — wraps block output in an <a> pointing to the post permalink.
- * 2. groupAspectRatio — injects aspect-ratio inline style onto the wrapper element.
- *
- * Static link URLs are written into saved HTML by the JS getSaveElement filter,
- * so this filter only needs to handle the dynamic Query Loop case.
+ * 1. groupAspectRatio    — injects aspect-ratio inline style onto the wrapper element.
+ * 2. groupLinkUrl        — strips nested <a> tags to keep HTML valid (the <a> wrapper
+ *                          itself is already written into saved HTML by getSaveElement).
+ * 3. groupLinkToPost     — strips nested <a> tags, then wraps output with an <a> pointing
+ *                          to the post permalink (Query Loop dynamic case).
  */
 add_filter( 'render_block_core/group', function ( string $block_content, array $block ): string {
 	static $link_depth = 0;
@@ -109,9 +116,17 @@ add_filter( 'render_block_core/group', function ( string $block_content, array $
 		}
 	}
 
-	// ── Link to Post (Query Loop) ─────────────────────────────────────────────
-	$link_to_post = ! empty( $attrs['groupLinkToPost'] );
+	$has_static_link = ! empty( $attrs['groupLinkUrl'] );
+	$link_to_post    = ! empty( $attrs['groupLinkToPost'] );
 
+	// ── Static Link: strip nested anchors ────────────────────────────────────
+	// The outer <a class="wp-block-group-link"> is already in saved HTML.
+	// Any <a> tags inside it produce invalid HTML — replace them with <span>.
+	if ( $has_static_link ) {
+		$block_content = group_block_extended_strip_nested_anchors( $block_content, true );
+	}
+
+	// ── Link to Post (Query Loop) ─────────────────────────────────────────────
 	if ( ! $link_to_post || $link_depth > 0 ) {
 		return $block_content;
 	}
@@ -122,9 +137,12 @@ add_filter( 'render_block_core/group', function ( string $block_content, array $
 		return $block_content;
 	}
 
-	$link_new_tab   = ! empty( $attrs['groupLinkNewTab'] );
-	$link_rel       = sanitize_text_field( $attrs['groupLinkRel'] ?? '' );
-	$link_aria      = $attrs['groupLinkAriaLabel'] ?? '';
+	// Strip nested anchors from inner content before wrapping.
+	$block_content = group_block_extended_strip_nested_anchors( $block_content, false );
+
+	$link_new_tab = ! empty( $attrs['groupLinkNewTab'] );
+	$link_rel     = sanitize_text_field( $attrs['groupLinkRel'] ?? '' );
+	$link_aria    = $attrs['groupLinkAriaLabel'] ?? '';
 
 	// Default aria-label to post title in Query Loop context.
 	if ( $link_aria === '' ) {
@@ -159,6 +177,38 @@ add_filter( 'render_block_core/group', function ( string $block_content, array $
 
 	return $output;
 }, 10, 2 );
+
+/**
+ * Strip nested <a> elements by replacing them with <span>, preventing invalid HTML
+ * when the group block is itself wrapped in an anchor.
+ *
+ * @param string $html           Rendered block HTML.
+ * @param bool   $has_outer_link True when the HTML is already wrapped in an outer <a>
+ *                               (static link case) — preserves that outermost tag.
+ */
+function group_block_extended_strip_nested_anchors( string $html, bool $has_outer_link = false ): string {
+	if ( $has_outer_link ) {
+		// Protect the outermost opening <a> (first occurrence).
+		$html = preg_replace( '/<a\b/', "\x00GBE_OPEN\x00", $html, 1 );
+
+		// Protect the outermost closing </a> (last occurrence).
+		$last_close = strrpos( $html, '</a>' );
+		if ( $last_close !== false ) {
+			$html = substr_replace( $html, "\x00GBE_CLOSE\x00", $last_close, 4 );
+		}
+	}
+
+	// Replace remaining <a …> with <span …> and </a> with </span>.
+	$html = preg_replace( '/<a\b([^>]*)>/i', '<span$1>', $html );
+	$html = preg_replace( '/<\/a>/i', '</span>', $html );
+
+	if ( $has_outer_link ) {
+		$html = str_replace( "\x00GBE_OPEN\x00", '<a', $html );
+		$html = str_replace( "\x00GBE_CLOSE\x00", '</a>', $html );
+	}
+
+	return $html;
+}
 
 /**
  * Convert a ratio string like "16:9" to a CSS aspect-ratio value like "16/9".

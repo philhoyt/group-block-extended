@@ -27,6 +27,13 @@
 	}
 }
 
+// Query Loop post URL preview shown below the "Link to post" toggle.
+.gbe-post-url-preview {
+	margin: -4px 0 12px;
+	font-size: 11px;
+	word-break: break-all;
+}
+
 // Constrain LinkControl within the inspector panel.
 .gbe-link-control-wrapper {
 	overflow: hidden;

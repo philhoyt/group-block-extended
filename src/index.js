@@ -21,7 +21,7 @@ addFilter(
 					return <BlockEdit { ...props } />;
 				}
 
-				const { clientId, attributes, setAttributes } = props;
+				const { clientId, attributes, setAttributes, context } = props;
 
 				return (
 					<>
@@ -36,6 +36,7 @@ addFilter(
 								clientId={ clientId }
 								attributes={ attributes }
 								setAttributes={ setAttributes }
+								context={ context }
 							/>
 						</InspectorControls>
 					</>

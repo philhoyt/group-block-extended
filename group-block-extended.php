@@ -32,6 +32,12 @@ add_filter( 'block_type_metadata', function ( array $metadata ): array {
 			'groupLinkAriaLabel' => [ 'type' => 'string',  'default' => '' ],
 			'groupLinkTitle'     => [ 'type' => 'string',  'default' => '' ],
 			'groupLinkToPost'    => [ 'type' => 'boolean', 'default' => false ],
+			'hoverTransform'     => [ 'type' => 'string',  'default' => '' ],
+			'hoverShadow'        => [ 'type' => 'string',  'default' => '' ],
+			'hoverOpacity'       => [ 'type' => 'string',  'default' => '' ],
+			'hoverFilter'        => [ 'type' => 'string',  'default' => '' ],
+			'hoverDuration'      => [ 'type' => 'string',  'default' => '' ],
+			'hoverEasing'        => [ 'type' => 'string',  'default' => '' ],
 		]
 	);
 
@@ -98,6 +104,33 @@ add_filter( 'render_block_core/group', function ( string $block_content, array $
 	static $link_depth = 0;
 
 	$attrs = $block['attrs'] ?? [];
+
+	// ── Hover Effects ─────────────────────────────────────────────────────────
+	$hover_vars = array_filter( [
+		'--hover-transform' => $attrs['hoverTransform'] ?? '',
+		'--hover-shadow'    => $attrs['hoverShadow']    ?? '',
+		'--hover-opacity'   => $attrs['hoverOpacity']   ?? '',
+		'--hover-filter'    => $attrs['hoverFilter']    ?? '',
+		'--hover-duration'  => $attrs['hoverDuration']  ?? '',
+		'--hover-easing'    => $attrs['hoverEasing']    ?? '',
+	] );
+
+	if ( ! empty( $hover_vars ) ) {
+		$hover_processor = new WP_HTML_Tag_Processor( $block_content );
+
+		if ( $hover_processor->next_tag() ) {
+			$hover_processor->add_class( 'has-hover-effects' );
+
+			$existing_style  = $hover_processor->get_attribute( 'style' ) ?? '';
+			$separator       = ( $existing_style !== '' && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
+			$css_vars        = '';
+			foreach ( $hover_vars as $prop => $value ) {
+				$css_vars .= $prop . ': ' . $value . '; ';
+			}
+			$hover_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
+			$block_content = $hover_processor->get_updated_html();
+		}
+	}
 
 	// ── Aspect Ratio ──────────────────────────────────────────────────────────
 	$aspect_ratio = $attrs['groupAspectRatio'] ?? '';

@@ -1,3 +1,26 @@
 .wp-block-group-link {
 	text-decoration: none;
 }
+
+.wp-block-group.has-hover-effects {
+	transition:
+		transform  var(--hover-duration, 300ms) var(--hover-easing, ease),
+		box-shadow var(--hover-duration, 300ms) var(--hover-easing, ease),
+		opacity    var(--hover-duration, 300ms) var(--hover-easing, ease),
+		filter     var(--hover-duration, 300ms) var(--hover-easing, ease);
+}
+
+.wp-block-group.has-hover-effects:hover {
+	transform:  var(--hover-transform, none);
+	box-shadow: var(--hover-shadow, none);
+	opacity:    var(--hover-opacity, 1);
+	filter:     var(--hover-filter, none);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.wp-block-group.has-hover-effects,
+	.wp-block-group.has-hover-effects:hover {
+		transition: none;
+		transform: none;
+	}
+}

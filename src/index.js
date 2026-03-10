@@ -6,8 +6,22 @@ import { cloneElement, createElement } from '@wordpress/element';
 import AspectRatioControl from './components/AspectRatioControl';
 import LinkedGroupControl from './components/LinkedGroupControl';
 import LinkedGroupToolbar from './components/LinkedGroupToolbar';
+import HoverEffectsControl from './components/HoverEffectsControl';
 
 import './editor.scss';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function hasAnyHoverEffect( attributes ) {
+	return !! (
+		attributes.hoverTransform ||
+		attributes.hoverShadow    ||
+		attributes.hoverOpacity   ||
+		attributes.hoverFilter    ||
+		attributes.hoverDuration  ||
+		attributes.hoverEasing
+	);
+}
 
 // ── editor.BlockEdit filter ───────────────────────────────────────────────────
 // Injects inspector panels into the Group block sidebar.
@@ -43,6 +57,10 @@ addFilter(
 								setAttributes={ setAttributes }
 								context={ context }
 							/>
+							<HoverEffectsControl
+								attributes={ attributes }
+								setAttributes={ setAttributes }
+							/>
 						</InspectorControls>
 					</>
 				);
@@ -58,31 +76,44 @@ addFilter(
 
 addFilter(
 	'editor.BlockListBlock',
-	'group-block-extended/aspect-ratio-editor',
+	'group-block-extended/block-list-block',
 	createHigherOrderComponent(
 		( BlockListBlock ) => ( props ) => {
 			if ( props.name !== 'core/group' ) {
 				return <BlockListBlock { ...props } />;
 			}
 
-			const { groupAspectRatio } = props.attributes;
-			const cssValue = groupAspectRatio ? ratioCss( groupAspectRatio ) : '';
+			const { groupAspectRatio, hoverTransform, hoverShadow, hoverOpacity, hoverFilter, hoverDuration, hoverEasing } = props.attributes;
+			const cssValue  = groupAspectRatio ? ratioCss( groupAspectRatio ) : '';
+			const hasHover  = hasAnyHoverEffect( props.attributes );
 
-			if ( ! cssValue ) {
+			if ( ! cssValue && ! hasHover ) {
 				return <BlockListBlock { ...props } />;
 			}
 
+			const hoverStyle = {};
+			if ( hoverTransform ) hoverStyle[ '--hover-transform' ] = hoverTransform;
+			if ( hoverShadow )    hoverStyle[ '--hover-shadow' ]    = hoverShadow;
+			if ( hoverOpacity )   hoverStyle[ '--hover-opacity' ]   = hoverOpacity;
+			if ( hoverFilter )    hoverStyle[ '--hover-filter' ]    = hoverFilter;
+			if ( hoverDuration )  hoverStyle[ '--hover-duration' ]  = hoverDuration;
+			if ( hoverEasing )    hoverStyle[ '--hover-easing' ]    = hoverEasing;
+
+			const existingClassName = props.wrapperProps?.className ?? '';
 			const wrapperProps = {
 				...props.wrapperProps,
 				style: {
 					...props.wrapperProps?.style,
-					aspectRatio: cssValue,
+					...( cssValue && { aspectRatio: cssValue } ),
+					...hoverStyle,
 				},
+				className: [ existingClassName, hasHover ? 'has-hover-effects' : '' ]
+					.filter( Boolean ).join( ' ' ),
 			};
 
 			return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 		},
-		'withGroupBlockAspectRatioEditor'
+		'withGroupBlockExtendedEditorWrapper'
 	)
 );
 
@@ -105,10 +136,16 @@ addFilter(
 			groupLinkAriaLabel,
 			groupLinkTitle,
 			groupLinkToPost,
+			hoverTransform,
+			hoverShadow,
+			hoverOpacity,
+			hoverFilter,
+			hoverDuration,
+			hoverEasing,
 		} = attributes;
 
 		// Nothing to do.
-		if ( ! groupAspectRatio && ! groupLinkUrl ) {
+		if ( ! groupAspectRatio && ! groupLinkUrl && ! hasAnyHoverEffect( attributes ) ) {
 			return element;
 		}
 
@@ -121,6 +158,26 @@ addFilter(
 				// Inject aspect-ratio into the wrapper element's style prop.
 				modifiedElement = injectStyleProp( modifiedElement, `aspect-ratio: ${ cssValue };` );
 			}
+		}
+
+		// ── Hover Effects ─────────────────────────────────────────────────────
+		if ( hasAnyHoverEffect( attributes ) ) {
+			const hoverStyle = {};
+			if ( hoverTransform ) hoverStyle[ '--hover-transform' ] = hoverTransform;
+			if ( hoverShadow )    hoverStyle[ '--hover-shadow' ]    = hoverShadow;
+			if ( hoverOpacity )   hoverStyle[ '--hover-opacity' ]   = hoverOpacity;
+			if ( hoverFilter )    hoverStyle[ '--hover-filter' ]    = hoverFilter;
+			if ( hoverDuration )  hoverStyle[ '--hover-duration' ]  = hoverDuration;
+			if ( hoverEasing )    hoverStyle[ '--hover-easing' ]    = hoverEasing;
+
+			modifiedElement = cloneElement( modifiedElement, {
+				className: [ modifiedElement.props?.className, 'has-hover-effects' ]
+					.filter( Boolean ).join( ' ' ),
+				style: {
+					...modifiedElement.props?.style,
+					...hoverStyle,
+				},
+			} );
 		}
 
 		// ── Static Link Wrap ──────────────────────────────────────────────────

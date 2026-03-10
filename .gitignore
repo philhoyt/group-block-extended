@@ -1,4 +1,6 @@
-node_modules
+node_modules/
 /build
 /vendor
+composer.lock
 *.zip
+.DS_Store

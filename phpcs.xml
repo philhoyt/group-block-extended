@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ruleset name="Group Block Extended">
+	<description>WordPress Coding Standards for Group Block Extended plugin.</description>
+
+	<!-- Files to check -->
+	<file>group-block-extended.php</file>
+
+	<!-- Exclude generated and third-party directories -->
+	<exclude-pattern>build/*</exclude-pattern>
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>node_modules/*</exclude-pattern>
+
+	<!-- WordPress Coding Standards -->
+	<rule ref="WordPress"/>
+
+	<!-- Plugin-specific configuration -->
+	<config name="minimum_supported_wp_version" value="6.4"/>
+	<config name="text_domain" value="group-block-extended"/>
+</ruleset>

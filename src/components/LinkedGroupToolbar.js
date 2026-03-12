@@ -1,30 +1,38 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { BlockControls, __experimentalLinkControl as LinkControl } from '@wordpress/block-editor';
-import { ToolbarButton, Popover, KeyboardShortcuts } from '@wordpress/components';
+import {
+	BlockControls,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalLinkControl as LinkControl,
+} from '@wordpress/block-editor';
+import {
+	ToolbarButton,
+	Popover,
+	KeyboardShortcuts,
+} from '@wordpress/components';
 import { link, linkOff } from '@wordpress/icons';
 import { rawShortcut, displayShortcut } from '@wordpress/keycodes';
 
 export default function LinkedGroupToolbar( { attributes, setAttributes } ) {
 	const { groupLinkUrl, groupLinkNewTab, groupLinkToPost } = attributes;
 
-	const [ isOpen, setIsOpen ]       = useState( false );
+	const [ isOpen, setIsOpen ] = useState( false );
 	const [ popoverAnchor, setAnchor ] = useState( null );
 
-	const isLinked     = !! ( groupLinkUrl || groupLinkToPost );
+	const isLinked = !! ( groupLinkUrl || groupLinkToPost );
 	// Query Loop links are managed only from the sidebar panel.
-	const isQueryLink  = groupLinkToPost && ! groupLinkUrl;
+	const isQueryLink = groupLinkToPost && ! groupLinkUrl;
 
 	function handleLinkChange( value ) {
 		setAttributes( {
-			groupLinkUrl:    value?.url ?? '',
+			groupLinkUrl: value?.url ?? '',
 			groupLinkNewTab: value?.opensInNewTab ?? false,
 		} );
 	}
 
 	function handleRemove() {
 		setAttributes( {
-			groupLinkUrl:    '',
+			groupLinkUrl: '',
 			groupLinkNewTab: false,
 			groupLinkToPost: false,
 		} );
@@ -86,13 +94,19 @@ export default function LinkedGroupToolbar( { attributes, setAttributes } ) {
 				>
 					<div className="gbe-toolbar-link-popover">
 						<LinkControl
-							value={ { url: groupLinkUrl, opensInNewTab: groupLinkNewTab } }
+							value={ {
+								url: groupLinkUrl,
+								opensInNewTab: groupLinkNewTab,
+							} }
 							onChange={ handleLinkChange }
 							onRemove={ groupLinkUrl ? handleRemove : undefined }
 							settings={ [
 								{
-									id:    'opensInNewTab',
-									title: __( 'Open in new tab', 'group-block-extended' ),
+									id: 'opensInNewTab',
+									title: __(
+										'Open in new tab',
+										'group-block-extended'
+									),
 								},
 							] }
 						/>

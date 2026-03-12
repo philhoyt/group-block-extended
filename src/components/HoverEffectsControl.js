@@ -3,7 +3,11 @@ import { PanelColorSettings } from '@wordpress/block-editor';
 
 export default function HoverEffectsControl( { attributes, setAttributes } ) {
 	const { hoverTextColor, hoverBackgroundColor, hoverLinkColor } = attributes;
-	const hasAny = !! ( hoverTextColor || hoverBackgroundColor || hoverLinkColor );
+	const hasAny = !! (
+		hoverTextColor ||
+		hoverBackgroundColor ||
+		hoverLinkColor
+	);
 
 	return (
 		<PanelColorSettings
@@ -12,17 +16,20 @@ export default function HoverEffectsControl( { attributes, setAttributes } ) {
 			colorSettings={ [
 				{
 					value: hoverTextColor,
-					onChange: ( value ) => setAttributes( { hoverTextColor: value ?? '' } ),
+					onChange: ( value ) =>
+						setAttributes( { hoverTextColor: value ?? '' } ),
 					label: __( 'Text', 'group-block-extended' ),
 				},
 				{
 					value: hoverBackgroundColor,
-					onChange: ( value ) => setAttributes( { hoverBackgroundColor: value ?? '' } ),
+					onChange: ( value ) =>
+						setAttributes( { hoverBackgroundColor: value ?? '' } ),
 					label: __( 'Background', 'group-block-extended' ),
 				},
 				{
 					value: hoverLinkColor,
-					onChange: ( value ) => setAttributes( { hoverLinkColor: value ?? '' } ),
+					onChange: ( value ) =>
+						setAttributes( { hoverLinkColor: value ?? '' } ),
 					label: __( 'Link', 'group-block-extended' ),
 				},
 			] }

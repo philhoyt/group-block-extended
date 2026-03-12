@@ -5,8 +5,17 @@
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
-    "lint:js": "wp-scripts lint-js"
+    "plugin-zip": "wp-scripts plugin-zip",
+    "lint:js": "wp-scripts lint-js",
+    "lint:php": "composer lint:php",
+    "lint:php:fix": "composer lint:php:fix"
   },
+  "files": [
+    "build",
+    "group-block-extended.php",
+    "readme.txt",
+    "style.css"
+  ],
   "devDependencies": {
     "@wordpress/icons": "^11.8.0",
     "@wordpress/scripts": "^30.0.0"

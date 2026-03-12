@@ -27,79 +27,31 @@ add_filter(
 		}
 
 		$metadata['attributes'] = array_merge(
-			$metadata['attributes'] ?? array(),
-			array(
-				'groupAspectRatio'   => array(
-					'type'    => 'string',
-					'default' => '',
-				),
-				'groupLinkUrl'       => array(
-					'type'    => 'string',
-					'default' => '',
-				),
-				'groupLinkNewTab'    => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-				'groupLinkRel'       => array(
-					'type'    => 'string',
-					'default' => '',
-				),
-				'groupLinkAriaLabel' => array(
-					'type'    => 'string',
-					'default' => '',
-				),
-				'groupLinkTitle'     => array(
-					'type'    => 'string',
-					'default' => '',
-				),
-				'groupLinkToPost'    => array(
-					'type'    => 'boolean',
-					'default' => false,
-				),
-			)
+			$metadata['attributes'] ?? [],
+			[
+				'groupAspectRatio'     => [ 'type' => 'string',  'default' => '' ],
+				'groupLinkUrl'         => [ 'type' => 'string',  'default' => '' ],
+				'groupLinkNewTab'      => [ 'type' => 'boolean', 'default' => false ],
+				'groupLinkRel'         => [ 'type' => 'string',  'default' => '' ],
+				'groupLinkAriaLabel'   => [ 'type' => 'string',  'default' => '' ],
+				'groupLinkTitle'       => [ 'type' => 'string',  'default' => '' ],
+				'groupLinkToPost'      => [ 'type' => 'boolean', 'default' => false ],
+				'hoverTextColor'       => [ 'type' => 'string',  'default' => '' ],
+				'hoverBackgroundColor' => [ 'type' => 'string',  'default' => '' ],
+				'hoverLinkColor'       => [ 'type' => 'string',  'default' => '' ],
+			]
 		);
 
 		// Needed so the editor passes postId/postType context into the block,
 		// enabling the Query Loop URL preview via useEntityProp.
-		$metadata['usesContext'] = array_unique(
-			array_merge(
-				$metadata['usesContext'] ?? array(),
-				array( 'queryId', 'postId', 'postType' )
-			)
-		);
+		$metadata['usesContext'] = array_unique( array_merge(
+			$metadata['usesContext'] ?? [],
+			[ 'queryId', 'postId', 'postType' ]
+		) );
 
 		return $metadata;
 	}
-
-	$metadata['attributes'] = array_merge(
-		$metadata['attributes'] ?? [],
-		[
-			'groupAspectRatio'   => [ 'type' => 'string',  'default' => '' ],
-			'groupLinkUrl'       => [ 'type' => 'string',  'default' => '' ],
-			'groupLinkNewTab'    => [ 'type' => 'boolean', 'default' => false ],
-			'groupLinkRel'       => [ 'type' => 'string',  'default' => '' ],
-			'groupLinkAriaLabel' => [ 'type' => 'string',  'default' => '' ],
-			'groupLinkTitle'     => [ 'type' => 'string',  'default' => '' ],
-			'groupLinkToPost'    => [ 'type' => 'boolean', 'default' => false ],
-			'hoverTransform'     => [ 'type' => 'string',  'default' => '' ],
-			'hoverShadow'        => [ 'type' => 'string',  'default' => '' ],
-			'hoverOpacity'       => [ 'type' => 'string',  'default' => '' ],
-			'hoverFilter'        => [ 'type' => 'string',  'default' => '' ],
-			'hoverDuration'      => [ 'type' => 'string',  'default' => '' ],
-			'hoverEasing'        => [ 'type' => 'string',  'default' => '' ],
-		]
-	);
-
-	// Needed so the editor passes postId/postType context into the block,
-	// enabling the Query Loop URL preview via useEntityProp.
-	$metadata['usesContext'] = array_unique( array_merge(
-		$metadata['usesContext'] ?? [],
-		[ 'queryId', 'postId', 'postType' ]
-	) );
-
-	return $metadata;
-} );
+);
 
 /**
  * Enqueue editor assets.
@@ -164,21 +116,18 @@ add_filter(
 
 		$attrs = $block['attrs'] ?? array();
 
-	// ── Hover Effects ─────────────────────────────────────────────────────────
+	// ── Hover Colors ──────────────────────────────────────────────────────────
 	$hover_vars = array_filter( [
-		'--hover-transform' => $attrs['hoverTransform'] ?? '',
-		'--hover-shadow'    => $attrs['hoverShadow']    ?? '',
-		'--hover-opacity'   => $attrs['hoverOpacity']   ?? '',
-		'--hover-filter'    => $attrs['hoverFilter']    ?? '',
-		'--hover-duration'  => $attrs['hoverDuration']  ?? '',
-		'--hover-easing'    => $attrs['hoverEasing']    ?? '',
+		'--hover-text-color'       => $attrs['hoverTextColor']       ?? '',
+		'--hover-background-color' => $attrs['hoverBackgroundColor'] ?? '',
+		'--hover-link-color'       => $attrs['hoverLinkColor']       ?? '',
 	] );
 
 	if ( ! empty( $hover_vars ) ) {
 		$hover_processor = new WP_HTML_Tag_Processor( $block_content );
 
 		if ( $hover_processor->next_tag() ) {
-			$hover_processor->add_class( 'has-hover-effects' );
+			$hover_processor->add_class( 'has-hover-colors' );
 
 			$existing_style  = $hover_processor->get_attribute( 'style' ) ?? '';
 			$separator       = ( $existing_style !== '' && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';

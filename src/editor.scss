@@ -45,27 +45,15 @@
 	word-break: break-all;
 }
 
-// Hover Effects — live preview in the editor canvas.
-.wp-block-group.has-hover-effects {
-	transition:
-		transform  var(--hover-duration, 300ms) var(--hover-easing, ease),
-		box-shadow var(--hover-duration, 300ms) var(--hover-easing, ease),
-		opacity    var(--hover-duration, 300ms) var(--hover-easing, ease),
-		filter     var(--hover-duration, 300ms) var(--hover-easing, ease);
-
+// Hover Colors — live preview in the editor canvas.
+.wp-block-group.has-hover-colors {
 	&:hover {
-		transform:  var(--hover-transform, none);
-		box-shadow: var(--hover-shadow, none);
-		opacity:    var(--hover-opacity, 1);
-		filter:     var(--hover-filter, none);
-	}
-}
+		color:            var(--hover-text-color, inherit) !important;
+		background-color: var(--hover-background-color, inherit) !important;
 
-@media (prefers-reduced-motion: reduce) {
-	.wp-block-group.has-hover-effects,
-	.wp-block-group.has-hover-effects:hover {
-		transition: none;
-		transform: none;
+		a {
+			color: var(--hover-link-color, inherit) !important;
+		}
 	}
 }
 

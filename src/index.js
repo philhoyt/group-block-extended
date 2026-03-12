@@ -14,12 +14,9 @@ import './editor.scss';
 
 function hasAnyHoverEffect( attributes ) {
 	return !! (
-		attributes.hoverTransform ||
-		attributes.hoverShadow    ||
-		attributes.hoverOpacity   ||
-		attributes.hoverFilter    ||
-		attributes.hoverDuration  ||
-		attributes.hoverEasing
+		attributes.hoverTextColor       ||
+		attributes.hoverBackgroundColor ||
+		attributes.hoverLinkColor
 	);
 }
 
@@ -83,7 +80,7 @@ addFilter(
 				return <BlockListBlock { ...props } />;
 			}
 
-			const { groupAspectRatio, hoverTransform, hoverShadow, hoverOpacity, hoverFilter, hoverDuration, hoverEasing } = props.attributes;
+			const { groupAspectRatio, hoverTextColor, hoverBackgroundColor, hoverLinkColor } = props.attributes;
 			const cssValue  = groupAspectRatio ? ratioCss( groupAspectRatio ) : '';
 			const hasHover  = hasAnyHoverEffect( props.attributes );
 
@@ -92,12 +89,9 @@ addFilter(
 			}
 
 			const hoverStyle = {};
-			if ( hoverTransform ) hoverStyle[ '--hover-transform' ] = hoverTransform;
-			if ( hoverShadow )    hoverStyle[ '--hover-shadow' ]    = hoverShadow;
-			if ( hoverOpacity )   hoverStyle[ '--hover-opacity' ]   = hoverOpacity;
-			if ( hoverFilter )    hoverStyle[ '--hover-filter' ]    = hoverFilter;
-			if ( hoverDuration )  hoverStyle[ '--hover-duration' ]  = hoverDuration;
-			if ( hoverEasing )    hoverStyle[ '--hover-easing' ]    = hoverEasing;
+			if ( hoverTextColor )       hoverStyle[ '--hover-text-color' ]       = hoverTextColor;
+			if ( hoverBackgroundColor ) hoverStyle[ '--hover-background-color' ] = hoverBackgroundColor;
+			if ( hoverLinkColor )       hoverStyle[ '--hover-link-color' ]       = hoverLinkColor;
 
 			const existingClassName = props.wrapperProps?.className ?? '';
 			const wrapperProps = {
@@ -107,7 +101,7 @@ addFilter(
 					...( cssValue && { aspectRatio: cssValue } ),
 					...hoverStyle,
 				},
-				className: [ existingClassName, hasHover ? 'has-hover-effects' : '' ]
+				className: [ existingClassName, hasHover ? 'has-hover-colors' : '' ]
 					.filter( Boolean ).join( ' ' ),
 			};
 
@@ -136,12 +130,9 @@ addFilter(
 			groupLinkAriaLabel,
 			groupLinkTitle,
 			groupLinkToPost,
-			hoverTransform,
-			hoverShadow,
-			hoverOpacity,
-			hoverFilter,
-			hoverDuration,
-			hoverEasing,
+			hoverTextColor,
+			hoverBackgroundColor,
+			hoverLinkColor,
 		} = attributes;
 
 		// Nothing to do.
@@ -160,18 +151,15 @@ addFilter(
 			}
 		}
 
-		// ── Hover Effects ─────────────────────────────────────────────────────
+		// ── Hover Colors ──────────────────────────────────────────────────────
 		if ( hasAnyHoverEffect( attributes ) ) {
 			const hoverStyle = {};
-			if ( hoverTransform ) hoverStyle[ '--hover-transform' ] = hoverTransform;
-			if ( hoverShadow )    hoverStyle[ '--hover-shadow' ]    = hoverShadow;
-			if ( hoverOpacity )   hoverStyle[ '--hover-opacity' ]   = hoverOpacity;
-			if ( hoverFilter )    hoverStyle[ '--hover-filter' ]    = hoverFilter;
-			if ( hoverDuration )  hoverStyle[ '--hover-duration' ]  = hoverDuration;
-			if ( hoverEasing )    hoverStyle[ '--hover-easing' ]    = hoverEasing;
+			if ( hoverTextColor )       hoverStyle[ '--hover-text-color' ]       = hoverTextColor;
+			if ( hoverBackgroundColor ) hoverStyle[ '--hover-background-color' ] = hoverBackgroundColor;
+			if ( hoverLinkColor )       hoverStyle[ '--hover-link-color' ]       = hoverLinkColor;
 
 			modifiedElement = cloneElement( modifiedElement, {
-				className: [ modifiedElement.props?.className, 'has-hover-effects' ]
+				className: [ modifiedElement.props?.className, 'has-hover-colors' ]
 					.filter( Boolean ).join( ' ' ),
 				style: {
 					...modifiedElement.props?.style,

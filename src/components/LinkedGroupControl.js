@@ -27,7 +27,7 @@ export default function LinkedGroupControl( { clientId, attributes, setAttribute
 			for ( const parentId of parents ) {
 				const parent = getBlock( parentId );
 				if ( ! parent ) continue;
-				if ( parent.name === 'core/query' ) insideQuery = true;
+				if ( parent.name === 'core/query' || parent.name === 'blockendar/events-query' ) insideQuery = true;
 				if ( parent.name === 'core/group' && ( parent.attributes?.groupLinkUrl || parent.attributes?.groupLinkToPost ) ) {
 					linkedAncestor = true;
 				}
@@ -115,7 +115,7 @@ export default function LinkedGroupControl( { clientId, attributes, setAttribute
 							<ToggleControl
 								label={ __( 'Link to post', 'group-block-extended' ) }
 								help={ __(
-									'Automatically links to the post permalink when used inside a Query Loop.',
+									'Automatically links to the post permalink when used inside a query loop.',
 									'group-block-extended'
 								) }
 								checked={ groupLinkToPost }

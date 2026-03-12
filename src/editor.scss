@@ -45,6 +45,18 @@
 	word-break: break-all;
 }
 
+// Hover Colors — live preview in the editor canvas.
+.wp-block-group.has-hover-colors {
+	&:hover {
+		color:            var(--hover-text-color, inherit) !important;
+		background-color: var(--hover-background-color, inherit) !important;
+
+		a {
+			color: var(--hover-link-color, inherit) !important;
+		}
+	}
+}
+
 // Constrain LinkControl within the inspector panel.
 .gbe-link-control-wrapper {
 	overflow: hidden;

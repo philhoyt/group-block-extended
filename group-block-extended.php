@@ -29,33 +29,45 @@ add_filter(
 		$metadata['attributes'] = array_merge(
 			$metadata['attributes'] ?? array(),
 			array(
-				'groupAspectRatio'   => array(
+				'groupAspectRatio'     => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'groupLinkUrl'       => array(
+				'groupLinkUrl'         => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'groupLinkNewTab'    => array(
+				'groupLinkNewTab'      => array(
 					'type'    => 'boolean',
 					'default' => false,
 				),
-				'groupLinkRel'       => array(
+				'groupLinkRel'         => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'groupLinkAriaLabel' => array(
+				'groupLinkAriaLabel'   => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'groupLinkTitle'     => array(
+				'groupLinkTitle'       => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'groupLinkToPost'    => array(
+				'groupLinkToPost'      => array(
 					'type'    => 'boolean',
 					'default' => false,
+				),
+				'hoverTextColor'       => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'hoverBackgroundColor' => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'hoverLinkColor'       => array(
+					'type'    => 'string',
+					'default' => '',
 				),
 			)
 		);
@@ -135,6 +147,32 @@ add_filter(
 		static $link_depth = 0;
 
 		$attrs = $block['attrs'] ?? array();
+
+		// ── Hover Colors ──────────────────────────────────────────────────────────
+		$hover_vars = array_filter(
+			array(
+				'--hover-text-color'       => $attrs['hoverTextColor'] ?? '',
+				'--hover-background-color' => $attrs['hoverBackgroundColor'] ?? '',
+				'--hover-link-color'       => $attrs['hoverLinkColor'] ?? '',
+			)
+		);
+
+		if ( ! empty( $hover_vars ) ) {
+			$hover_processor = new WP_HTML_Tag_Processor( $block_content );
+
+			if ( $hover_processor->next_tag() ) {
+				$hover_processor->add_class( 'has-hover-colors' );
+
+				$existing_style = $hover_processor->get_attribute( 'style' ) ?? '';
+				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
+				$css_vars       = '';
+				foreach ( $hover_vars as $prop => $value ) {
+					$css_vars .= $prop . ': ' . $value . '; ';
+				}
+				$hover_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
+				$block_content = $hover_processor->get_updated_html();
+			}
+		}
 
 		// ── Aspect Ratio ──────────────────────────────────────────────────────────
 		$aspect_ratio = $attrs['groupAspectRatio'] ?? '';

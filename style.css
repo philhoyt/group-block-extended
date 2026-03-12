@@ -1,3 +1,12 @@
 .wp-block-group-link {
 	text-decoration: none;
 }
+
+.wp-block-group.has-hover-colors:hover {
+	color:            var(--hover-text-color, inherit) !important;
+	background-color: var(--hover-background-color, inherit) !important;
+}
+
+.wp-block-group.has-hover-colors:hover a {
+	color: var(--hover-link-color, inherit) !important;
+}

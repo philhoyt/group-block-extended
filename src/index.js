@@ -6,8 +6,19 @@ import { cloneElement, createElement } from '@wordpress/element';
 import AspectRatioControl from './components/AspectRatioControl';
 import LinkedGroupControl from './components/LinkedGroupControl';
 import LinkedGroupToolbar from './components/LinkedGroupToolbar';
+import HoverEffectsControl from './components/HoverEffectsControl';
 
 import './editor.scss';
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function hasAnyHoverEffect( attributes ) {
+	return !! (
+		attributes.hoverTextColor ||
+		attributes.hoverBackgroundColor ||
+		attributes.hoverLinkColor
+	);
+}
 
 // ── editor.BlockEdit filter ───────────────────────────────────────────────────
 // Injects inspector panels into the Group block sidebar.
@@ -15,41 +26,42 @@ import './editor.scss';
 addFilter(
 	'editor.BlockEdit',
 	'group-block-extended/with-inspector-controls',
-	createHigherOrderComponent(
-		( BlockEdit ) => {
-			return function GroupBlockExtended( props ) {
-				if ( props.name !== 'core/group' ) {
-					return <BlockEdit { ...props } />;
-				}
+	createHigherOrderComponent( ( BlockEdit ) => {
+		return function GroupBlockExtended( props ) {
+			if ( props.name !== 'core/group' ) {
+				return <BlockEdit { ...props } />;
+			}
 
-				const { clientId, attributes, setAttributes, context } = props;
+			const { clientId, attributes, setAttributes, context } = props;
 
-				return (
-					<>
-						<BlockEdit { ...props } />
-						<LinkedGroupToolbar
+			return (
+				<>
+					<BlockEdit { ...props } />
+					<LinkedGroupToolbar
+						attributes={ attributes }
+						setAttributes={ setAttributes }
+					/>
+					<InspectorControls>
+						<AspectRatioControl
+							clientId={ clientId }
 							attributes={ attributes }
 							setAttributes={ setAttributes }
 						/>
-						<InspectorControls>
-							<AspectRatioControl
-								clientId={ clientId }
-								attributes={ attributes }
-								setAttributes={ setAttributes }
-							/>
-							<LinkedGroupControl
-								clientId={ clientId }
-								attributes={ attributes }
-								setAttributes={ setAttributes }
-								context={ context }
-							/>
-						</InspectorControls>
-					</>
-				);
-			};
-		},
-		'withGroupBlockExtendedControls'
-	)
+						<LinkedGroupControl
+							clientId={ clientId }
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+							context={ context }
+						/>
+						<HoverEffectsControl
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
+					</InspectorControls>
+				</>
+			);
+		};
+	}, 'withGroupBlockExtendedControls' )
 );
 
 // ── editor.BlockListBlock filter ──────────────────────────────────────────────
@@ -58,31 +70,60 @@ addFilter(
 
 addFilter(
 	'editor.BlockListBlock',
-	'group-block-extended/aspect-ratio-editor',
+	'group-block-extended/block-list-block',
 	createHigherOrderComponent(
 		( BlockListBlock ) => ( props ) => {
 			if ( props.name !== 'core/group' ) {
 				return <BlockListBlock { ...props } />;
 			}
 
-			const { groupAspectRatio } = props.attributes;
-			const cssValue = groupAspectRatio ? ratioCss( groupAspectRatio ) : '';
+			const {
+				groupAspectRatio,
+				hoverTextColor,
+				hoverBackgroundColor,
+				hoverLinkColor,
+			} = props.attributes;
+			const cssValue = groupAspectRatio
+				? ratioCss( groupAspectRatio )
+				: '';
+			const hasHover = hasAnyHoverEffect( props.attributes );
 
-			if ( ! cssValue ) {
+			if ( ! cssValue && ! hasHover ) {
 				return <BlockListBlock { ...props } />;
 			}
 
+			const hoverStyle = {};
+			if ( hoverTextColor ) {
+				hoverStyle[ '--hover-text-color' ] = hoverTextColor;
+			}
+			if ( hoverBackgroundColor ) {
+				hoverStyle[ '--hover-background-color' ] = hoverBackgroundColor;
+			}
+			if ( hoverLinkColor ) {
+				hoverStyle[ '--hover-link-color' ] = hoverLinkColor;
+			}
+
+			const existingClassName = props.wrapperProps?.className ?? '';
 			const wrapperProps = {
 				...props.wrapperProps,
 				style: {
 					...props.wrapperProps?.style,
-					aspectRatio: cssValue,
+					...( cssValue && { aspectRatio: cssValue } ),
+					...hoverStyle,
 				},
+				className: [
+					existingClassName,
+					hasHover ? 'has-hover-colors' : '',
+				]
+					.filter( Boolean )
+					.join( ' ' ),
 			};
 
-			return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+			return (
+				<BlockListBlock { ...props } wrapperProps={ wrapperProps } />
+			);
 		},
-		'withGroupBlockAspectRatioEditor'
+		'withGroupBlockExtendedEditorWrapper'
 	)
 );
 
@@ -105,10 +146,17 @@ addFilter(
 			groupLinkAriaLabel,
 			groupLinkTitle,
 			groupLinkToPost,
+			hoverTextColor,
+			hoverBackgroundColor,
+			hoverLinkColor,
 		} = attributes;
 
 		// Nothing to do.
-		if ( ! groupAspectRatio && ! groupLinkUrl ) {
+		if (
+			! groupAspectRatio &&
+			! groupLinkUrl &&
+			! hasAnyHoverEffect( attributes )
+		) {
 			return element;
 		}
 
@@ -119,28 +167,72 @@ addFilter(
 			const cssValue = ratioCss( groupAspectRatio );
 			if ( cssValue ) {
 				// Inject aspect-ratio into the wrapper element's style prop.
-				modifiedElement = injectStyleProp( modifiedElement, `aspect-ratio: ${ cssValue };` );
+				modifiedElement = injectStyleProp(
+					modifiedElement,
+					`aspect-ratio: ${ cssValue };`
+				);
 			}
+		}
+
+		// ── Hover Colors ──────────────────────────────────────────────────────
+		if ( hasAnyHoverEffect( attributes ) ) {
+			const hoverStyle = {};
+			if ( hoverTextColor ) {
+				hoverStyle[ '--hover-text-color' ] = hoverTextColor;
+			}
+			if ( hoverBackgroundColor ) {
+				hoverStyle[ '--hover-background-color' ] = hoverBackgroundColor;
+			}
+			if ( hoverLinkColor ) {
+				hoverStyle[ '--hover-link-color' ] = hoverLinkColor;
+			}
+
+			modifiedElement = cloneElement( modifiedElement, {
+				className: [
+					modifiedElement.props?.className,
+					'has-hover-colors',
+				]
+					.filter( Boolean )
+					.join( ' ' ),
+				style: {
+					...modifiedElement.props?.style,
+					...hoverStyle,
+				},
+			} );
 		}
 
 		// ── Static Link Wrap ──────────────────────────────────────────────────
 		// groupLinkToPost is handled PHP-side only; never write permalink into saved HTML.
 		if ( groupLinkUrl && ! groupLinkToPost ) {
-			const relParts = ( groupLinkRel || '' ).split( ' ' ).filter( Boolean );
+			const relParts = ( groupLinkRel || '' )
+				.split( ' ' )
+				.filter( Boolean );
 			if ( groupLinkNewTab ) {
-				if ( ! relParts.includes( 'noopener' ) )   relParts.push( 'noopener' );
-				if ( ! relParts.includes( 'noreferrer' ) ) relParts.push( 'noreferrer' );
+				if ( ! relParts.includes( 'noopener' ) ) {
+					relParts.push( 'noopener' );
+				}
+				if ( ! relParts.includes( 'noreferrer' ) ) {
+					relParts.push( 'noreferrer' );
+				}
 			}
 
 			const linkProps = {
-				href:       groupLinkUrl,
-				className:  'wp-block-group-link',
+				href: groupLinkUrl,
+				className: 'wp-block-group-link',
 			};
 
-			if ( groupLinkNewTab )        linkProps.target    = '_blank';
-			if ( relParts.length )        linkProps.rel       = relParts.join( ' ' );
-			if ( groupLinkAriaLabel )     linkProps[ 'aria-label' ] = groupLinkAriaLabel;
-			if ( groupLinkTitle )         linkProps.title     = groupLinkTitle;
+			if ( groupLinkNewTab ) {
+				linkProps.target = '_blank';
+			}
+			if ( relParts.length ) {
+				linkProps.rel = relParts.join( ' ' );
+			}
+			if ( groupLinkAriaLabel ) {
+				linkProps[ 'aria-label' ] = groupLinkAriaLabel;
+			}
+			if ( groupLinkTitle ) {
+				linkProps.title = groupLinkTitle;
+			}
 
 			modifiedElement = createElement( 'a', linkProps, modifiedElement );
 		}
@@ -153,29 +245,42 @@ addFilter(
 
 /**
  * Convert "16:9" → "16/9" for CSS aspect-ratio.
+ * @param {string} ratio
  */
 function ratioCss( ratio ) {
-	const match = String( ratio ).trim().match( /^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$/ );
+	const match = String( ratio )
+		.trim()
+		.match( /^(\d+(?:\.\d+)?)\s*[:/]\s*(\d+(?:\.\d+)?)$/ );
 	return match ? `${ match[ 1 ] }/${ match[ 2 ] }` : '';
 }
 
 /**
  * Clone a React element, merging an additional CSS declaration into its style prop.
+ * @param {import('react').ReactElement} element
+ * @param {string}                       cssDeclaration
  */
 function injectStyleProp( element, cssDeclaration ) {
-	if ( ! element || typeof element !== 'object' ) return element;
+	if ( ! element || typeof element !== 'object' ) {
+		return element;
+	}
 
 	const existingStyle = element.props?.style ?? {};
 
 	// If style is a string (shouldn't be in React, but guard anyway).
 	if ( typeof existingStyle === 'string' ) {
 		return cloneElement( element, {
-			style: existingStyle + ( existingStyle.endsWith( ';' ) ? ' ' : '; ' ) + cssDeclaration,
+			style:
+				existingStyle +
+				( existingStyle.endsWith( ';' ) ? ' ' : '; ' ) +
+				cssDeclaration,
 		} );
 	}
 
 	// Parse the declaration "aspect-ratio: 16/9;" into { aspectRatio: '16/9' }.
-	const [ prop, value ] = cssDeclaration.replace( /;$/, '' ).split( ':' ).map( ( s ) => s.trim() );
+	const [ prop, value ] = cssDeclaration
+		.replace( /;$/, '' )
+		.split( ':' )
+		.map( ( s ) => s.trim() );
 	const camelProp = prop.replace( /-([a-z])/g, ( _, l ) => l.toUpperCase() );
 
 	return cloneElement( element, {

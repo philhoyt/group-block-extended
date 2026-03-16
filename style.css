@@ -10,3 +10,21 @@
 .wp-block-group.has-hover-colors:hover a {
 	color: var(--hover-link-color, inherit) !important;
 }
+
+.wp-block-group.has-hover-overlay {
+	position: relative;
+}
+
+.wp-block-group.has-hover-overlay::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-color: var(--hover-overlay-color);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	pointer-events: none;
+}
+
+.wp-block-group.has-hover-overlay:hover::after {
+	opacity: calc(var(--hover-overlay-opacity, 50) / 100);
+}

@@ -16,7 +16,8 @@ function hasAnyHoverEffect( attributes ) {
 	return !! (
 		attributes.hoverTextColor ||
 		attributes.hoverBackgroundColor ||
-		attributes.hoverLinkColor
+		attributes.hoverLinkColor ||
+		attributes.hoverOverlayColor
 	);
 }
 
@@ -41,21 +42,23 @@ addFilter(
 						attributes={ attributes }
 						setAttributes={ setAttributes }
 					/>
-					<InspectorControls>
+					<InspectorControls group="styles">
 						<AspectRatioControl
 							clientId={ clientId }
 							attributes={ attributes }
 							setAttributes={ setAttributes }
 						/>
+						<HoverEffectsControl
+							attributes={ attributes }
+							setAttributes={ setAttributes }
+						/>
+					</InspectorControls>
+					<InspectorControls>
 						<LinkedGroupControl
 							clientId={ clientId }
 							attributes={ attributes }
 							setAttributes={ setAttributes }
 							context={ context }
-						/>
-						<HoverEffectsControl
-							attributes={ attributes }
-							setAttributes={ setAttributes }
 						/>
 					</InspectorControls>
 				</>
@@ -82,6 +85,8 @@ addFilter(
 				hoverTextColor,
 				hoverBackgroundColor,
 				hoverLinkColor,
+				hoverOverlayColor,
+				hoverOverlayOpacity,
 			} = props.attributes;
 			const cssValue = groupAspectRatio
 				? ratioCss( groupAspectRatio )
@@ -102,6 +107,10 @@ addFilter(
 			if ( hoverLinkColor ) {
 				hoverStyle[ '--hover-link-color' ] = hoverLinkColor;
 			}
+			if ( hoverOverlayColor ) {
+				hoverStyle[ '--hover-overlay-color' ] = hoverOverlayColor;
+				hoverStyle[ '--hover-overlay-opacity' ] = hoverOverlayOpacity ?? 50;
+			}
 
 			const existingClassName = props.wrapperProps?.className ?? '';
 			const wrapperProps = {
@@ -113,7 +122,8 @@ addFilter(
 				},
 				className: [
 					existingClassName,
-					hasHover ? 'has-hover-colors' : '',
+					( hoverTextColor || hoverBackgroundColor || hoverLinkColor ) ? 'has-hover-colors' : '',
+					hoverOverlayColor ? 'has-hover-overlay' : '',
 				]
 					.filter( Boolean )
 					.join( ' ' ),
@@ -149,6 +159,8 @@ addFilter(
 			hoverTextColor,
 			hoverBackgroundColor,
 			hoverLinkColor,
+			hoverOverlayColor,
+			hoverOverlayOpacity,
 		} = attributes;
 
 		// Nothing to do.
@@ -174,7 +186,7 @@ addFilter(
 			}
 		}
 
-		// ── Hover Colors ──────────────────────────────────────────────────────
+		// ── Hover Colors & Overlay ────────────────────────────────────────────
 		if ( hasAnyHoverEffect( attributes ) ) {
 			const hoverStyle = {};
 			if ( hoverTextColor ) {
@@ -186,11 +198,16 @@ addFilter(
 			if ( hoverLinkColor ) {
 				hoverStyle[ '--hover-link-color' ] = hoverLinkColor;
 			}
+			if ( hoverOverlayColor ) {
+				hoverStyle[ '--hover-overlay-color' ] = hoverOverlayColor;
+				hoverStyle[ '--hover-overlay-opacity' ] = hoverOverlayOpacity ?? 50;
+			}
 
 			modifiedElement = cloneElement( modifiedElement, {
 				className: [
 					modifiedElement.props?.className,
-					'has-hover-colors',
+					( hoverTextColor || hoverBackgroundColor || hoverLinkColor ) ? 'has-hover-colors' : '',
+					hoverOverlayColor ? 'has-hover-overlay' : '',
 				]
 					.filter( Boolean )
 					.join( ' ' ),

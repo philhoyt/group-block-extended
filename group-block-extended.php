@@ -69,6 +69,14 @@ add_filter(
 					'type'    => 'string',
 					'default' => '',
 				),
+				'hoverOverlayColor'    => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'hoverOverlayOpacity'  => array(
+					'type'    => 'integer',
+					'default' => 50,
+				),
 			)
 		);
 
@@ -148,20 +156,36 @@ add_filter(
 
 		$attrs = $block['attrs'] ?? array();
 
-		// ── Hover Colors ──────────────────────────────────────────────────────────
+		// ── Hover Colors & Overlay ────────────────────────────────────────────────
+		$hover_text_color       = $attrs['hoverTextColor'] ?? '';
+		$hover_background_color = $attrs['hoverBackgroundColor'] ?? '';
+		$hover_link_color       = $attrs['hoverLinkColor'] ?? '';
+		$hover_overlay_color    = $attrs['hoverOverlayColor'] ?? '';
+		$hover_overlay_opacity  = isset( $attrs['hoverOverlayOpacity'] ) ? (int) $attrs['hoverOverlayOpacity'] : 50;
+
 		$hover_vars = array_filter(
 			array(
-				'--hover-text-color'       => $attrs['hoverTextColor'] ?? '',
-				'--hover-background-color' => $attrs['hoverBackgroundColor'] ?? '',
-				'--hover-link-color'       => $attrs['hoverLinkColor'] ?? '',
+				'--hover-text-color'       => $hover_text_color,
+				'--hover-background-color' => $hover_background_color,
+				'--hover-link-color'       => $hover_link_color,
+				'--hover-overlay-color'    => $hover_overlay_color,
+				'--hover-overlay-opacity'  => '' !== $hover_overlay_color ? (string) $hover_overlay_opacity : '',
 			)
 		);
+
+		$has_hover_colors  = $hover_text_color || $hover_background_color || $hover_link_color;
+		$has_hover_overlay = (bool) $hover_overlay_color;
 
 		if ( ! empty( $hover_vars ) ) {
 			$hover_processor = new WP_HTML_Tag_Processor( $block_content );
 
 			if ( $hover_processor->next_tag() ) {
-				$hover_processor->add_class( 'has-hover-colors' );
+				if ( $has_hover_colors ) {
+					$hover_processor->add_class( 'has-hover-colors' );
+				}
+				if ( $has_hover_overlay ) {
+					$hover_processor->add_class( 'has-hover-overlay' );
+				}
 
 				$existing_style = $hover_processor->get_attribute( 'style' ) ?? '';
 				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';

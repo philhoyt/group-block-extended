@@ -57,6 +57,25 @@
 	}
 }
 
+// Hover Overlay — live preview in the editor canvas.
+.wp-block-group.has-hover-overlay {
+	position: relative;
+
+	&::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background-color: var(--hover-overlay-color);
+		opacity: 0;
+		transition: opacity 0.2s ease;
+		pointer-events: none;
+	}
+
+	&:hover::after {
+		opacity: calc(var(--hover-overlay-opacity, 50) / 100);
+	}
+}
+
 // Constrain LinkControl within the inspector panel.
 .gbe-link-control-wrapper {
 	overflow: hidden;

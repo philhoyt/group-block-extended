@@ -94,7 +94,7 @@ add_filter(
 );
 
 /**
- * Enqueue editor assets.
+ * Enqueue editor JS.
  */
 add_action(
 	'enqueue_block_editor_assets',
@@ -114,6 +114,27 @@ add_action(
 			$asset['version'],
 			true
 		);
+	}
+);
+
+/**
+ * Enqueue editor CSS via enqueue_block_assets so it is injected into the
+ * editor iframe (the block canvas), not just the outer admin page.
+ */
+add_action(
+	'enqueue_block_assets',
+	function (): void {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		$asset_file = plugin_dir_path( __FILE__ ) . 'build/index.asset.php';
+
+		if ( ! file_exists( $asset_file ) ) {
+			return;
+		}
+
+		$asset = require $asset_file;
 
 		wp_enqueue_style(
 			'group-block-extended-editor',

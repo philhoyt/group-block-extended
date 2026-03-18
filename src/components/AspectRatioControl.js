@@ -11,11 +11,14 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 const RATIO_PRESETS = [
 	{ label: __( 'None', 'group-block-extended' ), value: '' },
 	{ label: __( '1:1', 'group-block-extended' ), value: '1:1' },
+	{ label: __( '5:4', 'group-block-extended' ), value: '5:4' },
 	{ label: __( '4:3', 'group-block-extended' ), value: '4:3' },
 	{ label: __( '3:2', 'group-block-extended' ), value: '3:2' },
 	{ label: __( '16:9', 'group-block-extended' ), value: '16:9' },
-	{ label: __( '2:1', 'group-block-extended' ), value: '2:1' },
-	{ label: __( '21:9', 'group-block-extended' ), value: '21:9' },
+	{ label: __( '4:5', 'group-block-extended' ), value: '4:5' },
+	{ label: __( '3:4', 'group-block-extended' ), value: '3:4' },
+	{ label: __( '2:3', 'group-block-extended' ), value: '2:3' },
+	{ label: __( '9:16', 'group-block-extended' ), value: '9:16' },
 	{ label: __( 'Custom…', 'group-block-extended' ), value: 'custom' },
 ];
 

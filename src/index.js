@@ -16,9 +16,12 @@ function hasAnyHoverEffect( attributes ) {
 	return !! (
 		attributes.hoverTextColor ||
 		attributes.hoverBackgroundColor ||
-		attributes.hoverLinkColor ||
-		attributes.hoverOverlayColor
+		attributes.hoverLinkColor
 	);
+}
+
+function hasOverlay( attributes ) {
+	return !! attributes.overlayColor;
 }
 
 // ── editor.BlockEdit filter ───────────────────────────────────────────────────
@@ -85,31 +88,38 @@ addFilter(
 				hoverTextColor,
 				hoverBackgroundColor,
 				hoverLinkColor,
-				hoverOverlayColor,
-				hoverOverlayOpacity,
+				overlayColor,
+				overlayOpacity,
+				overlayHoverColor,
+				overlayHoverOpacity,
 			} = props.attributes;
 			const cssValue = groupAspectRatio
 				? ratioCss( groupAspectRatio )
 				: '';
 			const hasHover = hasAnyHoverEffect( props.attributes );
+			const hasOv = hasOverlay( props.attributes );
 
-			if ( ! cssValue && ! hasHover ) {
+			if ( ! cssValue && ! hasHover && ! hasOv ) {
 				return <BlockListBlock { ...props } />;
 			}
 
-			const hoverStyle = {};
+			const extraStyle = {};
 			if ( hoverTextColor ) {
-				hoverStyle[ '--hover-text-color' ] = hoverTextColor;
+				extraStyle[ '--hover-text-color' ] = hoverTextColor;
 			}
 			if ( hoverBackgroundColor ) {
-				hoverStyle[ '--hover-background-color' ] = hoverBackgroundColor;
+				extraStyle[ '--hover-background-color' ] = hoverBackgroundColor;
 			}
 			if ( hoverLinkColor ) {
-				hoverStyle[ '--hover-link-color' ] = hoverLinkColor;
+				extraStyle[ '--hover-link-color' ] = hoverLinkColor;
 			}
-			if ( hoverOverlayColor ) {
-				hoverStyle[ '--hover-overlay-color' ] = hoverOverlayColor;
-				hoverStyle[ '--hover-overlay-opacity' ] = hoverOverlayOpacity ?? 50;
+			if ( overlayColor ) {
+				extraStyle[ '--overlay-color' ] = overlayColor;
+				extraStyle[ '--overlay-opacity' ] = overlayOpacity ?? 50;
+				extraStyle[ '--overlay-hover-opacity' ] = overlayHoverOpacity ?? 50;
+				if ( overlayHoverColor ) {
+					extraStyle[ '--overlay-hover-color' ] = overlayHoverColor;
+				}
 			}
 
 			const existingClassName = props.wrapperProps?.className ?? '';
@@ -118,12 +128,12 @@ addFilter(
 				style: {
 					...props.wrapperProps?.style,
 					...( cssValue && { aspectRatio: cssValue } ),
-					...hoverStyle,
+					...extraStyle,
 				},
 				className: [
 					existingClassName,
-					( hoverTextColor || hoverBackgroundColor || hoverLinkColor ) ? 'has-hover-colors' : '',
-					hoverOverlayColor ? 'has-hover-overlay' : '',
+					hasHover ? 'has-hover-colors' : '',
+					hasOv ? 'has-overlay' : '',
 				]
 					.filter( Boolean )
 					.join( ' ' ),
@@ -159,15 +169,18 @@ addFilter(
 			hoverTextColor,
 			hoverBackgroundColor,
 			hoverLinkColor,
-			hoverOverlayColor,
-			hoverOverlayOpacity,
+			overlayColor,
+			overlayOpacity,
+			overlayHoverColor,
+			overlayHoverOpacity,
 		} = attributes;
 
 		// Nothing to do.
 		if (
 			! groupAspectRatio &&
 			! groupLinkUrl &&
-			! hasAnyHoverEffect( attributes )
+			! hasAnyHoverEffect( attributes ) &&
+			! hasOverlay( attributes )
 		) {
 			return element;
 		}
@@ -186,7 +199,7 @@ addFilter(
 			}
 		}
 
-		// ── Hover Colors & Overlay ────────────────────────────────────────────
+		// ── Hover Colors ──────────────────────────────────────────────────────────
 		if ( hasAnyHoverEffect( attributes ) ) {
 			const hoverStyle = {};
 			if ( hoverTextColor ) {
@@ -198,22 +211,42 @@ addFilter(
 			if ( hoverLinkColor ) {
 				hoverStyle[ '--hover-link-color' ] = hoverLinkColor;
 			}
-			if ( hoverOverlayColor ) {
-				hoverStyle[ '--hover-overlay-color' ] = hoverOverlayColor;
-				hoverStyle[ '--hover-overlay-opacity' ] = hoverOverlayOpacity ?? 50;
-			}
 
 			modifiedElement = cloneElement( modifiedElement, {
 				className: [
 					modifiedElement.props?.className,
-					( hoverTextColor || hoverBackgroundColor || hoverLinkColor ) ? 'has-hover-colors' : '',
-					hoverOverlayColor ? 'has-hover-overlay' : '',
+					'has-hover-colors',
 				]
 					.filter( Boolean )
 					.join( ' ' ),
 				style: {
 					...modifiedElement.props?.style,
 					...hoverStyle,
+				},
+			} );
+		}
+
+		// ── Overlay (default + hover state) ──────────────────────────────────────
+		if ( hasOverlay( attributes ) ) {
+			const overlayStyle = {
+				'--overlay-color': overlayColor,
+				'--overlay-opacity': overlayOpacity ?? 50,
+				'--overlay-hover-opacity': overlayHoverOpacity ?? 50,
+			};
+			if ( overlayHoverColor ) {
+				overlayStyle[ '--overlay-hover-color' ] = overlayHoverColor;
+			}
+
+			modifiedElement = cloneElement( modifiedElement, {
+				className: [
+					modifiedElement.props?.className,
+					'has-overlay',
+				]
+					.filter( Boolean )
+					.join( ' ' ),
+				style: {
+					...modifiedElement.props?.style,
+					...overlayStyle,
 				},
 			} );
 		}

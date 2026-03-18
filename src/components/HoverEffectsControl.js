@@ -7,18 +7,20 @@ export default function HoverEffectsControl( { attributes, setAttributes } ) {
 		hoverTextColor,
 		hoverBackgroundColor,
 		hoverLinkColor,
-		hoverOverlayColor,
-		hoverOverlayOpacity,
+		overlayColor,
+		overlayOpacity,
+		overlayHoverColor,
+		overlayHoverOpacity,
 	} = attributes;
 
-	const hasAny = !! ( hoverTextColor || hoverBackgroundColor || hoverLinkColor );
-	const hasOverlay = !! hoverOverlayColor;
+	const hasAnyHoverColor = !! ( hoverTextColor || hoverBackgroundColor || hoverLinkColor );
+	const hasOverlay = !! overlayColor;
 
 	return (
 		<>
 			<PanelColorSettings
 				title={ __( 'Hover Colors', 'group-block-extended' ) }
-				initialOpen={ hasAny }
+				initialOpen={ hasAnyHoverColor }
 				colorSettings={ [
 					{
 						value: hoverTextColor,
@@ -43,33 +45,53 @@ export default function HoverEffectsControl( { attributes, setAttributes } ) {
 				] }
 			/>
 			<PanelColorSettings
-				title={ __( 'Hover Overlay', 'group-block-extended' ) }
+				title={ __( 'Overlay', 'group-block-extended' ) }
 				initialOpen={ hasOverlay }
 				colorSettings={ [
 					{
-						value: hoverOverlayColor,
+						value: overlayColor,
 						onChange: ( value ) => {
-							const update = { hoverOverlayColor: value ?? '' };
+							const update = { overlayColor: value ?? '' };
 							if ( ! value ) {
-								update.hoverOverlayOpacity = 50;
+								update.overlayOpacity = 50;
+								update.overlayHoverColor = '';
+								update.overlayHoverOpacity = 50;
 							}
 							setAttributes( update );
 						},
-						label: __( 'Color', 'group-block-extended' ),
+						label: __( 'Default Color', 'group-block-extended' ),
+					},
+					{
+						value: overlayHoverColor,
+						onChange: ( value ) =>
+							setAttributes( { overlayHoverColor: value ?? '' } ),
+						label: __( 'Hover Color', 'group-block-extended' ),
 					},
 				] }
 			>
 				{ hasOverlay && (
-					<RangeControl
-						label={ __( 'Opacity', 'group-block-extended' ) }
-						value={ hoverOverlayOpacity ?? 50 }
-						onChange={ ( value ) =>
-							setAttributes( { hoverOverlayOpacity: value } )
-						}
-						min={ 0 }
-						max={ 100 }
-						step={ 10 }
-					/>
+					<>
+						<RangeControl
+							label={ __( 'Default Opacity', 'group-block-extended' ) }
+							value={ overlayOpacity ?? 50 }
+							onChange={ ( value ) =>
+								setAttributes( { overlayOpacity: value } )
+							}
+							min={ 0 }
+							max={ 100 }
+							step={ 10 }
+						/>
+						<RangeControl
+							label={ __( 'Hover Opacity', 'group-block-extended' ) }
+							value={ overlayHoverOpacity ?? 50 }
+							onChange={ ( value ) =>
+								setAttributes( { overlayHoverOpacity: value } )
+							}
+							min={ 0 }
+							max={ 100 }
+							step={ 10 }
+						/>
+					</>
 				) }
 			</PanelColorSettings>
 		</>

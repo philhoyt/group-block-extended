@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Group Block Extended
  * Description: Non-destructively extends the core Group block with aspect ratio control and linked group functionality.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      Phil Hoyt
  * License:     GPL-2.0-or-later
  * Requires at least: 6.4
@@ -69,11 +69,19 @@ add_filter(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'hoverOverlayColor'    => array(
+				'overlayColor'         => array(
 					'type'    => 'string',
 					'default' => '',
 				),
-				'hoverOverlayOpacity'  => array(
+				'overlayOpacity'       => array(
+					'type'    => 'integer',
+					'default' => 50,
+				),
+				'overlayHoverColor'    => array(
+					'type'    => 'string',
+					'default' => '',
+				),
+				'overlayHoverOpacity'  => array(
 					'type'    => 'integer',
 					'default' => 50,
 				),
@@ -155,7 +163,7 @@ add_action(
 			'group-block-extended',
 			plugin_dir_url( __FILE__ ) . 'style.css',
 			array(),
-			'1.0.0'
+			'1.1.0'
 		);
 	}
 );
@@ -177,45 +185,64 @@ add_filter(
 
 		$attrs = $block['attrs'] ?? array();
 
-		// ── Hover Colors & Overlay ────────────────────────────────────────────────
+		// ── Hover Colors ──────────────────────────────────────────────────────────
 		$hover_text_color       = $attrs['hoverTextColor'] ?? '';
 		$hover_background_color = $attrs['hoverBackgroundColor'] ?? '';
 		$hover_link_color       = $attrs['hoverLinkColor'] ?? '';
-		$hover_overlay_color    = $attrs['hoverOverlayColor'] ?? '';
-		$hover_overlay_opacity  = isset( $attrs['hoverOverlayOpacity'] ) ? (int) $attrs['hoverOverlayOpacity'] : 50;
 
-		$hover_vars = array_filter(
+		$hover_color_vars = array_filter(
 			array(
 				'--hover-text-color'       => $hover_text_color,
 				'--hover-background-color' => $hover_background_color,
 				'--hover-link-color'       => $hover_link_color,
-				'--hover-overlay-color'    => $hover_overlay_color,
-				'--hover-overlay-opacity'  => '' !== $hover_overlay_color ? (string) $hover_overlay_opacity : '',
 			)
 		);
 
-		$has_hover_colors  = $hover_text_color || $hover_background_color || $hover_link_color;
-		$has_hover_overlay = (bool) $hover_overlay_color;
+		$has_hover_colors = $hover_text_color || $hover_background_color || $hover_link_color;
 
-		if ( ! empty( $hover_vars ) ) {
+		if ( ! empty( $hover_color_vars ) ) {
 			$hover_processor = new WP_HTML_Tag_Processor( $block_content );
 
 			if ( $hover_processor->next_tag() ) {
 				if ( $has_hover_colors ) {
 					$hover_processor->add_class( 'has-hover-colors' );
 				}
-				if ( $has_hover_overlay ) {
-					$hover_processor->add_class( 'has-hover-overlay' );
-				}
 
 				$existing_style = $hover_processor->get_attribute( 'style' ) ?? '';
 				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
 				$css_vars       = '';
-				foreach ( $hover_vars as $prop => $value ) {
+				foreach ( $hover_color_vars as $prop => $value ) {
 					$css_vars .= $prop . ': ' . $value . '; ';
 				}
 				$hover_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
 				$block_content = $hover_processor->get_updated_html();
+			}
+		}
+
+		// ── Overlay (default + hover state) ───────────────────────────────────────
+		$overlay_color        = $attrs['overlayColor'] ?? '';
+		$overlay_opacity      = isset( $attrs['overlayOpacity'] ) ? (int) $attrs['overlayOpacity'] : 50;
+		$overlay_hover_color  = $attrs['overlayHoverColor'] ?? '';
+		$overlay_hover_opacity = isset( $attrs['overlayHoverOpacity'] ) ? (int) $attrs['overlayHoverOpacity'] : 50;
+
+		if ( '' !== $overlay_color ) {
+			$overlay_processor = new WP_HTML_Tag_Processor( $block_content );
+
+			if ( $overlay_processor->next_tag() ) {
+				$overlay_processor->add_class( 'has-overlay' );
+
+				$existing_style = $overlay_processor->get_attribute( 'style' ) ?? '';
+				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
+
+				$css_vars  = '--overlay-color: ' . $overlay_color . '; ';
+				$css_vars .= '--overlay-opacity: ' . $overlay_opacity . '; ';
+				$css_vars .= '--overlay-hover-opacity: ' . $overlay_hover_opacity . '; ';
+				if ( '' !== $overlay_hover_color ) {
+					$css_vars .= '--overlay-hover-color: ' . $overlay_hover_color . '; ';
+				}
+
+				$overlay_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
+				$block_content = $overlay_processor->get_updated_html();
 			}
 		}
 

@@ -2,6 +2,12 @@ import { addFilter } from '@wordpress/hooks';
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { cloneElement, createElement } from '@wordpress/element';
+import {
+	getBlockVariations,
+	unregisterBlockVariation,
+	registerBlockVariation,
+} from '@wordpress/blocks';
+import domReady from '@wordpress/dom-ready';
 
 import AspectRatioControl from './components/AspectRatioControl';
 import LinkedGroupControl from './components/LinkedGroupControl';
@@ -9,6 +15,50 @@ import LinkedGroupToolbar from './components/LinkedGroupToolbar';
 import HoverEffectsControl from './components/HoverEffectsControl';
 
 import './editor.scss';
+
+// ── Default Overrides for the "Group" Variation ──────────────────────────────
+// Replaces the built-in "group" variation so that picking "Group" from the
+// variation picker creates a block with admin-configured defaults (alignment
+// and/or layout). Row, Stack, and Grid variations are left untouched.
+
+const pluginSettings = window.groupBlockExtended ?? {};
+
+domReady( () => {
+	const { defaultAlignment, disableContentWidth } = pluginSettings;
+
+	if ( ! defaultAlignment && ! disableContentWidth ) {
+		return;
+	}
+
+	const variations = getBlockVariations( 'core/group' );
+	const groupVariation = variations?.find( ( v ) => v.name === 'group' );
+
+	if ( ! groupVariation ) {
+		return;
+	}
+
+	// Build replacement attributes.
+	const newAttributes = { ...groupVariation.attributes };
+
+	if ( disableContentWidth ) {
+		newAttributes.layout = { type: 'default' };
+	}
+
+	if ( defaultAlignment ) {
+		newAttributes.align = defaultAlignment;
+	}
+
+	// Swap the variation.
+	unregisterBlockVariation( 'core/group', 'group' );
+	registerBlockVariation( 'core/group', {
+		...groupVariation,
+		attributes: newAttributes,
+		isActive: ( blockAttributes ) =>
+			! blockAttributes.layout?.type ||
+			blockAttributes.layout?.type === 'constrained' ||
+			blockAttributes.layout?.type === 'default',
+	} );
+} );
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -116,7 +166,8 @@ addFilter(
 			if ( overlayColor ) {
 				extraStyle[ '--overlay-color' ] = overlayColor;
 				extraStyle[ '--overlay-opacity' ] = overlayOpacity ?? 50;
-				extraStyle[ '--overlay-hover-opacity' ] = overlayHoverOpacity ?? 50;
+				extraStyle[ '--overlay-hover-opacity' ] =
+					overlayHoverOpacity ?? 50;
 				if ( overlayHoverColor ) {
 					extraStyle[ '--overlay-hover-color' ] = overlayHoverColor;
 				}
@@ -238,10 +289,7 @@ addFilter(
 			}
 
 			modifiedElement = cloneElement( modifiedElement, {
-				className: [
-					modifiedElement.props?.className,
-					'has-overlay',
-				]
+				className: [ modifiedElement.props?.className, 'has-overlay' ]
 					.filter( Boolean )
 					.join( ' ' ),
 				style: {

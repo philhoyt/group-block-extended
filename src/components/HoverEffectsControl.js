@@ -13,7 +13,11 @@ export default function HoverEffectsControl( { attributes, setAttributes } ) {
 		overlayHoverOpacity,
 	} = attributes;
 
-	const hasAnyHoverColor = !! ( hoverTextColor || hoverBackgroundColor || hoverLinkColor );
+	const hasAnyHoverColor = !! (
+		hoverTextColor ||
+		hoverBackgroundColor ||
+		hoverLinkColor
+	);
 	const hasOverlay = !! overlayColor;
 
 	return (
@@ -72,7 +76,10 @@ export default function HoverEffectsControl( { attributes, setAttributes } ) {
 				{ hasOverlay && (
 					<>
 						<RangeControl
-							label={ __( 'Default Opacity', 'group-block-extended' ) }
+							label={ __(
+								'Default Opacity',
+								'group-block-extended'
+							) }
 							value={ overlayOpacity ?? 50 }
 							onChange={ ( value ) =>
 								setAttributes( { overlayOpacity: value } )
@@ -82,7 +89,10 @@ export default function HoverEffectsControl( { attributes, setAttributes } ) {
 							step={ 10 }
 						/>
 						<RangeControl
-							label={ __( 'Hover Opacity', 'group-block-extended' ) }
+							label={ __(
+								'Hover Opacity',
+								'group-block-extended'
+							) }
 							value={ overlayHoverOpacity ?? 50 }
 							onChange={ ( value ) =>
 								setAttributes( { overlayHoverOpacity: value } )

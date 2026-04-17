@@ -81,6 +81,17 @@
 	}
 }
 
+// Space-around justify — live preview in the editor canvas.
+// wrapperProps.className lands on the same element as .wp-block-group.
+.wp-block-group.gbe-justify-space-around {
+	justify-content: space-around !important;
+}
+
+// Navigation block space-around — mirrors the items-justified-* custom property pattern.
+.wp-block-navigation.items-justified-space-around {
+	--navigation-layout-justify: space-around;
+}
+
 // Constrain LinkControl within the inspector panel.
 .gbe-link-control-wrapper {
 	overflow: hidden;

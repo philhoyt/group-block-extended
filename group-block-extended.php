@@ -298,6 +298,35 @@ add_action(
 );
 
 /**
+ * Server-side render filter for core/navigation.
+ *
+ * Adds the items-justified-space-around class when justifyContent is space-around,
+ * matching the navigation block's own items-justified-* class pattern.
+ */
+add_filter(
+	'render_block_core/navigation',
+	function ( string $block_content, array $block ): string {
+		$attrs  = $block['attrs'] ?? array();
+		$layout = $attrs['layout'] ?? array();
+
+		if ( 'space-around' !== ( $layout['justifyContent'] ?? '' ) ) {
+			return $block_content;
+		}
+
+		$processor = new WP_HTML_Tag_Processor( $block_content );
+
+		if ( $processor->next_tag() ) {
+			$processor->add_class( 'items-justified-space-around' );
+			$block_content = $processor->get_updated_html();
+		}
+
+		return $block_content;
+	},
+	10,
+	2
+);
+
+/**
  * Server-side render filter for core/group.
  *
  * Handles:
@@ -372,6 +401,23 @@ add_filter(
 
 				$overlay_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
 				$block_content = $overlay_processor->get_updated_html();
+			}
+		}
+
+		// ── Layout: Space Around ─────────────────────────────────────────────────
+		// WordPress core doesn't output CSS for justify-content: space-around, so
+		// we inject it as an inline style which overrides the generated layout class.
+		$layout          = $attrs['layout'] ?? array();
+		$justify_content = $layout['justifyContent'] ?? '';
+
+		if ( 'flex' === ( $layout['type'] ?? '' ) && 'space-around' === $justify_content ) {
+			$justify_processor = new WP_HTML_Tag_Processor( $block_content );
+
+			if ( $justify_processor->next_tag() ) {
+				$existing_style = $justify_processor->get_attribute( 'style' ) ?? '';
+				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
+				$justify_processor->set_attribute( 'style', $existing_style . $separator . 'justify-content: space-around;' );
+				$block_content = $justify_processor->get_updated_html();
 			}
 		}
 

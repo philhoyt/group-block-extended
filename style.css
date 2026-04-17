@@ -1,3 +1,8 @@
+.wp-block-navigation.items-justified-space-around {
+	--navigation-layout-justify: space-around;
+	--navigation-layout-justification-setting: space-around;
+}
+
 .wp-block-group-link {
 	text-decoration: none;
 	display: inherit;

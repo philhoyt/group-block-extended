@@ -1,7 +1,9 @@
 import { addFilter } from '@wordpress/hooks';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { cloneElement, createElement } from '@wordpress/element';
+import { ToolbarDropdownMenu } from '@wordpress/components';
+import { justifyLeft, justifyCenter, justifyRight, justifySpaceBetween } from '@wordpress/icons';
 import {
 	getBlockVariations,
 	unregisterBlockVariation,
@@ -74,6 +76,44 @@ function hasOverlay( attributes ) {
 	return !! attributes.overlayColor;
 }
 
+// ── Justification toolbar — replaces core flex layout justify control ─────────
+// blocks.registerBlockType filter suppresses the core control so we can render
+// our own dropdown that includes the extra "space around" option.
+
+addFilter(
+	'blocks.registerBlockType',
+	'group-block-extended/disable-core-justify',
+	( settings, name ) => {
+		if ( name !== 'core/group' && name !== 'core/navigation' ) {
+			return settings;
+		}
+		return {
+			...settings,
+			supports: {
+				...settings.supports,
+				layout: {
+					...settings.supports?.layout,
+					allowJustification: false,
+				},
+			},
+		};
+	}
+);
+
+const spaceAroundIcon = (
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+		<path d="M4 4h1v16H4zm15 0h1v16h-1zM7 8h3v8H7V8zm7 0h3v8h-3V8z" />
+	</svg>
+);
+
+const JUSTIFY_OPTIONS = [
+	{ title: 'Justify items left', icon: justifyLeft, value: 'left' },
+	{ title: 'Justify items center', icon: justifyCenter, value: 'center' },
+	{ title: 'Justify items right', icon: justifyRight, value: 'right' },
+	{ title: 'Space between items', icon: justifySpaceBetween, value: 'space-between' },
+	{ title: 'Space around items', icon: spaceAroundIcon, value: 'space-around' },
+];
+
 // ── editor.BlockEdit filter ───────────────────────────────────────────────────
 // Injects inspector panels into the Group block sidebar.
 
@@ -82,38 +122,79 @@ addFilter(
 	'group-block-extended/with-inspector-controls',
 	createHigherOrderComponent( ( BlockEdit ) => {
 		return function GroupBlockExtended( props ) {
-			if ( props.name !== 'core/group' ) {
+			const isGroup = props.name === 'core/group';
+			const isNav = props.name === 'core/navigation';
+
+			if ( ! isGroup && ! isNav ) {
 				return <BlockEdit { ...props } />;
 			}
 
 			const { clientId, attributes, setAttributes, context } = props;
+			const layout = attributes.layout ?? {};
+			// Navigation is always flex; group must opt in via layout.type.
+			const isFlexLayout = isNav || layout.type === 'flex';
 
 			return (
 				<>
 					<BlockEdit { ...props } />
-					<LinkedGroupToolbar
-						attributes={ attributes }
-						setAttributes={ setAttributes }
-					/>
-					<InspectorControls group="styles">
-						<AspectRatioControl
-							clientId={ clientId }
-							attributes={ attributes }
-							setAttributes={ setAttributes }
-						/>
-						<HoverEffectsControl
-							attributes={ attributes }
-							setAttributes={ setAttributes }
-						/>
-					</InspectorControls>
-					<InspectorControls>
-						<LinkedGroupControl
-							clientId={ clientId }
-							attributes={ attributes }
-							setAttributes={ setAttributes }
-							context={ context }
-						/>
-					</InspectorControls>
+					{ isFlexLayout && (
+						<BlockControls group="block">
+							<ToolbarDropdownMenu
+								icon={
+									JUSTIFY_OPTIONS.find(
+										( o ) =>
+											o.value ===
+											layout.justifyContent
+									)?.icon ?? justifyLeft
+								}
+								label="Change items justification"
+								controls={ JUSTIFY_OPTIONS.map( ( option ) => ( {
+									title: option.title,
+									icon: option.icon,
+									isActive:
+										layout.justifyContent === option.value,
+									onClick: () =>
+										setAttributes( {
+											layout: {
+												...layout,
+												justifyContent:
+													layout.justifyContent ===
+													option.value
+														? undefined
+														: option.value,
+											},
+										} ),
+								} ) ) }
+							/>
+						</BlockControls>
+					) }
+					{ isGroup && (
+						<>
+							<LinkedGroupToolbar
+								attributes={ attributes }
+								setAttributes={ setAttributes }
+							/>
+							<InspectorControls group="styles">
+								<AspectRatioControl
+									clientId={ clientId }
+									attributes={ attributes }
+									setAttributes={ setAttributes }
+								/>
+								<HoverEffectsControl
+									attributes={ attributes }
+									setAttributes={ setAttributes }
+								/>
+							</InspectorControls>
+							<InspectorControls>
+								<LinkedGroupControl
+									clientId={ clientId }
+									attributes={ attributes }
+									setAttributes={ setAttributes }
+									context={ context }
+								/>
+							</InspectorControls>
+						</>
+					) }
 				</>
 			);
 		};
@@ -129,6 +210,28 @@ addFilter(
 	'group-block-extended/block-list-block',
 	createHigherOrderComponent(
 		( BlockListBlock ) => ( props ) => {
+			// ── Navigation: only needs the space-around class ─────────────────
+			if ( props.name === 'core/navigation' ) {
+				const navLayout = props.attributes.layout ?? {};
+				if ( navLayout.justifyContent !== 'space-around' ) {
+					return <BlockListBlock { ...props } />;
+				}
+				const existingClassName =
+					props.wrapperProps?.className ?? '';
+				const wrapperProps = {
+					...props.wrapperProps,
+					className: [
+						existingClassName,
+						'items-justified-space-around',
+					]
+						.filter( Boolean )
+						.join( ' ' ),
+				};
+				return (
+					<BlockListBlock { ...props } wrapperProps={ wrapperProps } />
+				);
+			}
+
 			if ( props.name !== 'core/group' ) {
 				return <BlockListBlock { ...props } />;
 			}
@@ -142,14 +245,18 @@ addFilter(
 				overlayOpacity,
 				overlayHoverColor,
 				overlayHoverOpacity,
+				layout: blockLayout,
 			} = props.attributes;
 			const cssValue = groupAspectRatio
 				? ratioCss( groupAspectRatio )
 				: '';
 			const hasHover = hasAnyHoverEffect( props.attributes );
 			const hasOv = hasOverlay( props.attributes );
+			const isSpaceAround =
+				blockLayout?.type === 'flex' &&
+				blockLayout?.justifyContent === 'space-around';
 
-			if ( ! cssValue && ! hasHover && ! hasOv ) {
+			if ( ! cssValue && ! hasHover && ! hasOv && ! isSpaceAround ) {
 				return <BlockListBlock { ...props } />;
 			}
 
@@ -185,6 +292,7 @@ addFilter(
 					existingClassName,
 					hasHover ? 'has-hover-colors' : '',
 					hasOv ? 'has-overlay' : '',
+					isSpaceAround ? 'gbe-justify-space-around' : '',
 				]
 					.filter( Boolean )
 					.join( ' ' ),

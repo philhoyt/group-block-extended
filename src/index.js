@@ -82,21 +82,30 @@ function hasOverlay( attributes ) {
 
 addFilter(
 	'blocks.registerBlockType',
-	'group-block-extended/disable-core-justify',
+	'group-block-extended/modify-supports',
 	( settings, name ) => {
 		if ( name !== 'core/group' && name !== 'core/navigation' ) {
 			return settings;
 		}
-		return {
-			...settings,
-			supports: {
-				...settings.supports,
-				layout: {
-					...settings.supports?.layout,
-					allowJustification: false,
-				},
+
+		const newSupports = {
+			...settings.supports,
+			// Suppress the core justify dropdown so our unified replacement renders.
+			layout: {
+				...settings.supports?.layout,
+				allowJustification: false,
 			},
 		};
+
+		// Enable height control — core only ships minHeight for group.
+		if ( name === 'core/group' ) {
+			newSupports.dimensions = {
+				...settings.supports?.dimensions,
+				height: true,
+			};
+		}
+
+		return { ...settings, supports: newSupports };
 	}
 );
 

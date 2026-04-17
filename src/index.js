@@ -219,7 +219,10 @@ addFilter(
 	'group-block-extended/block-list-block',
 	createHigherOrderComponent(
 		( BlockListBlock ) => ( props ) => {
-			// ── Navigation: only needs the space-around class ─────────────────
+			// ── Navigation: add class + inline CSS variable ───────────────────
+			// The class drives frontend-parity CSS; the inline custom property
+			// overrides the navigation block's own --navigation-layout-justify
+			// default in the editor canvas regardless of CSS load order.
 			if ( props.name === 'core/navigation' ) {
 				const navLayout = props.attributes.layout ?? {};
 				if ( navLayout.justifyContent !== 'space-around' ) {
@@ -235,6 +238,10 @@ addFilter(
 					]
 						.filter( Boolean )
 						.join( ' ' ),
+					style: {
+						...props.wrapperProps?.style,
+						'--navigation-layout-justify': 'space-around',
+					},
 				};
 				return (
 					<BlockListBlock { ...props } wrapperProps={ wrapperProps } />

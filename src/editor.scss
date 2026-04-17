@@ -88,8 +88,14 @@
 }
 
 // Navigation block space-around — mirrors the items-justified-* custom property pattern.
+// Also targets __container directly because it uses flex-grow: 1 and therefore
+// needs its own justify-content rather than relying on the parent flex container.
 .wp-block-navigation.items-justified-space-around {
 	--navigation-layout-justify: space-around;
+}
+
+.wp-block-navigation.items-justified-space-around .wp-block-navigation__container {
+	justify-content: space-around;
 }
 
 // Constrain LinkControl within the inspector panel.

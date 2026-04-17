@@ -3,6 +3,10 @@
 	--navigation-layout-justification-setting: space-around;
 }
 
+.wp-block-navigation.items-justified-space-around .wp-block-navigation__container {
+	justify-content: space-around;
+}
+
 .wp-block-group-link {
 	text-decoration: none;
 	display: inherit;

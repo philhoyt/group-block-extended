@@ -5,7 +5,7 @@
  * Version:     1.1.0
  * Author:      Phil Hoyt
  * License:     GPL-2.0-or-later
- * Requires at least: 6.4
+ * Requires at least: 7.0
  * Requires PHP: 8.0
  * Text Domain: group-block-extended
  *

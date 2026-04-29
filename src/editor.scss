@@ -30,6 +30,15 @@
 	}
 }
 
+// Fade background to transparent on hover — live preview in the editor canvas.
+.wp-block-group.has-hover-bg-transparent {
+	transition: background-color 0.3s ease;
+
+	&:hover {
+		background-color: transparent !important;
+	}
+}
+
 // Overlay (default + hover state) — live preview in the editor canvas.
 // Must appear BEFORE the linked badge so the badge takes precedence via cascade.
 .wp-block-group.has-overlay {

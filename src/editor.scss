@@ -20,13 +20,26 @@
 
 // Hover Colors — live preview in the editor canvas.
 .wp-block-group.has-hover-colors {
+	transition: color 0.3s ease;
+
+	a {
+		transition: color 0.3s ease;
+	}
+
 	&:hover {
-		color:            var(--hover-text-color, inherit) !important;
-		background-color: var(--hover-background-color, inherit) !important;
+		color: var(--hover-text-color, inherit) !important;
 
 		a {
 			color: var(--hover-link-color, inherit) !important;
 		}
+	}
+}
+
+.wp-block-group.has-hover-bg-color {
+	transition: background-color 0.3s ease;
+
+	&:hover {
+		background-color: var(--hover-background-color) !important;
 	}
 }
 
@@ -59,6 +72,7 @@
 	&:hover::before {
 		background-color: var(--overlay-hover-color, var(--overlay-color));
 		opacity: calc(var(--overlay-hover-opacity, var(--overlay-opacity, 50)) / 100);
+		transition: background-color 0.3s ease, opacity 0.3s ease;
 	}
 }
 

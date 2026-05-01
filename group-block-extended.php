@@ -365,6 +365,9 @@ add_filter(
 				if ( $has_hover_colors ) {
 					$hover_processor->add_class( 'has-hover-colors' );
 				}
+				if ( $hover_background_color ) {
+					$hover_processor->add_class( 'has-hover-bg-color' );
+				}
 
 				$existing_style = $hover_processor->get_attribute( 'style' ) ?? '';
 				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';

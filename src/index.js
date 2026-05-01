@@ -307,6 +307,7 @@ addFilter(
 				className: [
 					existingClassName,
 					hasHover ? 'has-hover-colors' : '',
+					hoverBackgroundColor ? 'has-hover-bg-color' : '',
 					hasOv ? 'has-overlay' : '',
 					isSpaceAround ? 'gbe-justify-space-around' : '',
 				]
@@ -391,6 +392,7 @@ addFilter(
 				className: [
 					modifiedElement.props?.className,
 					'has-hover-colors',
+					hoverBackgroundColor ? 'has-hover-bg-color' : '',
 				]
 					.filter( Boolean )
 					.join( ' ' ),

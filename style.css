@@ -12,13 +12,28 @@
 	display: inherit;
 }
 
+.wp-block-group.has-hover-colors {
+	transition: color 0.3s ease;
+}
+
 .wp-block-group.has-hover-colors:hover {
-	color:            var(--hover-text-color, inherit) !important;
-	background-color: var(--hover-background-color, inherit) !important;
+	color: var(--hover-text-color, inherit) !important;
+}
+
+.wp-block-group.has-hover-colors a {
+	transition: color 0.3s ease;
 }
 
 .wp-block-group.has-hover-colors:hover a {
 	color: var(--hover-link-color, inherit) !important;
+}
+
+.wp-block-group.has-hover-bg-color {
+	transition: background-color 0.3s ease;
+}
+
+.wp-block-group.has-hover-bg-color:hover {
+	background-color: var(--hover-background-color) !important;
 }
 
 .wp-block-group.has-overlay {
@@ -40,4 +55,5 @@
 .wp-block-group.has-overlay:hover::before {
 	background-color: var(--overlay-hover-color, var(--overlay-color));
 	opacity: calc(var(--overlay-hover-opacity, var(--overlay-opacity, 50)) / 100);
+	transition: background-color 0.3s ease, opacity 0.3s ease;
 }

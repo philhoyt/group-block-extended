@@ -18,4 +18,4 @@ paths:
 - Distribution: GitHub (no release workflow)
 - Main file: `group-block-extended.php`
 - Version constant: none (version in plugin header only)
-- Note: header says "Requires at least: 7.0" which appears to be a typo — verify and correct
+- Note: WP 7.0 minimum is intentional — uses a feature not available before 7.0

@@ -1,0 +1,13 @@
+includes:
+    - vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - group-block-extended.php
+    excludePaths:
+        - vendor
+        - node_modules
+        - build
+        - lib
+        - tests

@@ -80,6 +80,7 @@
 // the group is linked. Placed AFTER the overlay rules so it wins when both
 // classes are present (same specificity, later rule wins).
 .wp-block-group {
+
 	&.is-group-linked {
 		position: relative;
 

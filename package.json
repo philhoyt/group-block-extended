@@ -6,9 +6,16 @@
     "build": "wp-scripts build",
     "start": "wp-scripts start",
     "plugin-zip": "wp-scripts plugin-zip",
-    "lint:js": "wp-scripts lint-js --ignore-pattern=lib/",
+    "lint:js": "wp-scripts lint-js",
     "lint:php": "composer lint:php",
-    "lint:php:fix": "composer lint:php:fix"
+    "lint:php:fix": "composer lint:php:fix",
+    "lint:css": "wp-scripts lint-style",
+    "test:unit": "wp-scripts test-unit-js",
+    "test:e2e": "wp-scripts test-playwright",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "env:clean": "wp-env clean",
+    "test:php": "wp-env run tests-cli --env-cwd wp-content/plugins/group-block-extended -- vendor/bin/phpunit"
   },
   "files": [
     "build",
@@ -18,7 +25,10 @@
     "style.css"
   ],
   "devDependencies": {
+    "@wordpress/env": "^10.39.0",
+    "@wordpress/eslint-plugin": "^22.22.0",
     "@wordpress/icons": "^11.8.0",
-    "@wordpress/scripts": "^30.0.0"
+    "@wordpress/scripts": "^30.0.0",
+    "@wordpress/stylelint-config": "^23.42.0"
   }
 }

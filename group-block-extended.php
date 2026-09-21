@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Group Block Extended
  * Description: Extends the core Group block with aspect ratio, linked groups, hover colors, overlay, height control, and a space-around justification option, plus admin defaults for new groups.
- * Version:     1.2.0
+ * Version:     1.3.0
  * Author:      Phil Hoyt
  * License:     GPL-2.0-or-later
  * Requires at least: 7.0
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'GROUP_BLOCK_EXTENDED_VERSION', '1.2.0' );
+define( 'GROUP_BLOCK_EXTENDED_VERSION', '1.3.0' );
 
 require_once __DIR__ . '/lib/plugin-update-checker/plugin-update-checker.php';
 

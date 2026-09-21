@@ -1,6 +1,6 @@
 {
   "name": "group-block-extended",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "WordPress plugin that extends the core Group block with aspect ratio and linked group features",
   "scripts": {
     "build": "wp-scripts build",

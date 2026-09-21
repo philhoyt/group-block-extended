@@ -3,7 +3,12 @@ import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { cloneElement, createElement } from '@wordpress/element';
 import { ToolbarDropdownMenu } from '@wordpress/components';
-import { justifyLeft, justifyCenter, justifyRight, justifySpaceBetween } from '@wordpress/icons';
+import {
+	justifyLeft,
+	justifyCenter,
+	justifyRight,
+	justifySpaceBetween,
+} from '@wordpress/icons';
 import {
 	getBlockVariations,
 	unregisterBlockVariation,
@@ -110,7 +115,11 @@ addFilter(
 );
 
 const spaceAroundIcon = (
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		viewBox="0 0 24 24"
+		fill="currentColor"
+	>
 		<path d="M4 4h1v16H4zm15 0h1v16h-1zM7 8h3v8H7V8zm7 0h3v8h-3V8z" />
 	</svg>
 );
@@ -119,8 +128,16 @@ const JUSTIFY_OPTIONS = [
 	{ title: 'Justify items left', icon: justifyLeft, value: 'left' },
 	{ title: 'Justify items center', icon: justifyCenter, value: 'center' },
 	{ title: 'Justify items right', icon: justifyRight, value: 'right' },
-	{ title: 'Space between items', icon: justifySpaceBetween, value: 'space-between' },
-	{ title: 'Space around items', icon: spaceAroundIcon, value: 'space-around' },
+	{
+		title: 'Space between items',
+		icon: justifySpaceBetween,
+		value: 'space-between',
+	},
+	{
+		title: 'Space around items',
+		icon: spaceAroundIcon,
+		value: 'space-around',
+	},
 ];
 
 // ── editor.BlockEdit filter ───────────────────────────────────────────────────
@@ -152,28 +169,30 @@ addFilter(
 								icon={
 									JUSTIFY_OPTIONS.find(
 										( o ) =>
-											o.value ===
-											layout.justifyContent
+											o.value === layout.justifyContent
 									)?.icon ?? justifyLeft
 								}
 								label="Change items justification"
-								controls={ JUSTIFY_OPTIONS.map( ( option ) => ( {
-									title: option.title,
-									icon: option.icon,
-									isActive:
-										layout.justifyContent === option.value,
-									onClick: () =>
-										setAttributes( {
-											layout: {
-												...layout,
-												justifyContent:
-													layout.justifyContent ===
-													option.value
-														? undefined
-														: option.value,
-											},
-										} ),
-								} ) ) }
+								controls={ JUSTIFY_OPTIONS.map(
+									( option ) => ( {
+										title: option.title,
+										icon: option.icon,
+										isActive:
+											layout.justifyContent ===
+											option.value,
+										onClick: () =>
+											setAttributes( {
+												layout: {
+													...layout,
+													justifyContent:
+														layout.justifyContent ===
+														option.value
+															? undefined
+															: option.value,
+												},
+											} ),
+									} )
+								) }
 							/>
 						</BlockControls>
 					) }
@@ -228,8 +247,7 @@ addFilter(
 				if ( navLayout.justifyContent !== 'space-around' ) {
 					return <BlockListBlock { ...props } />;
 				}
-				const existingClassName =
-					props.wrapperProps?.className ?? '';
+				const existingClassName = props.wrapperProps?.className ?? '';
 				const wrapperProps = {
 					...props.wrapperProps,
 					className: [
@@ -244,7 +262,10 @@ addFilter(
 					},
 				};
 				return (
-					<BlockListBlock { ...props } wrapperProps={ wrapperProps } />
+					<BlockListBlock
+						{ ...props }
+						wrapperProps={ wrapperProps }
+					/>
 				);
 			}
 

@@ -1,9 +1,9 @@
 === Group Block Extended ===
 Contributors:      philhoyt
 Tags:              block, group, aspect ratio, linked block, card, overlay, hover
-Requires at least: 6.4
-Tested up to:      6.9.1
-Stable tag:        1.1.0
+Requires at least: 7.0
+Tested up to:      7.1
+Stable tag:        1.2.0
 Requires PHP:      8.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -71,6 +71,15 @@ No. The "Link to post" toggle is only available when the Group block is inside a
 The overlay uses a separate pseudo-element layered above the group's background but below its content. This means you can set a background image on the group and add an overlay tint on top of it, with the text remaining fully visible above both. It also supports independent default and hover states with a CSS transition between them.
 
 == Changelog ==
+
+= 1.2.0 =
+* Add: Settings page (Settings → Group Block Extended) to set the default alignment and turn off "Inner blocks use content width" for new Group blocks. Both defaults can also be set with the `group_block_extended_default_alignment` and `group_block_extended_disable_content_width` filters.
+* Add: "Space around" option in the justification control for Group and Navigation blocks with a flex layout.
+* Add: Height control in the Group block Dimensions panel, next to Min. Height.
+* Add: Plugin updates are now delivered from GitHub releases through the WordPress updates screen.
+* Change: WordPress 7.0 is now the minimum supported version.
+* Fix: Hover colors now transition smoothly, and the hover background color no longer bleeds outside the block.
+* Fix: "Space around" justification on Navigation blocks now applies in the editor and to the inner menu container.
 
 = 1.1.0 =
 * Added overlay feature: always-visible color layer behind group content with configurable default opacity, hover color, and hover opacity — CSS transition between states.

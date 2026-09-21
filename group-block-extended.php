@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Group Block Extended
  * Description: Non-destructively extends the core Group block with aspect ratio control and linked group functionality.
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      Phil Hoyt
  * License:     GPL-2.0-or-later
  * Requires at least: 7.0

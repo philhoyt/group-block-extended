@@ -12,6 +12,7 @@
   },
   "files": [
     "build",
+    "lib",
     "group-block-extended.php",
     "readme.txt",
     "style.css"

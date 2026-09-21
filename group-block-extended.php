@@ -16,6 +16,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/lib/plugin-update-checker/plugin-update-checker.php';
+
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+/**
+ * Check GitHub releases for plugin updates.
+ */
+$group_block_extended_update_checker = PucFactory::buildUpdateChecker(
+	'https://github.com/philhoyt/group-block-extended/',
+	__FILE__,
+	'group-block-extended'
+);
+$group_block_extended_update_checker->getVcsApi()->enableReleaseAssets();
+
 /**
  * Register custom attributes and context on core/group via block_type_metadata filter.
  */

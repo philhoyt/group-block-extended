@@ -1,11 +1,17 @@
 {
     "scripts": {
         "lint:php": "phpcs",
-        "lint:php:fix": "phpcbf"
+        "lint:php:fix": "phpcbf",
+        "copy-puc": "rsync -a --delete vendor/yahnis-elsts/plugin-update-checker/ lib/plugin-update-checker/",
+        "post-install-cmd": "@copy-puc",
+        "post-update-cmd": "@copy-puc"
+    },
+    "require": {
+        "yahnis-elsts/plugin-update-checker": "^5.3"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.13",
-        "wp-coding-standards/wpcs": "^3.3",
+        "wp-coding-standards/wpcs": "^3.4.1",
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2"
     },
     "config": {

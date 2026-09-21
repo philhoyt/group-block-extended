@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Group Block Extended
- * Description: Non-destructively extends the core Group block with aspect ratio control and linked group functionality.
+ * Description: Extends the core Group block with aspect ratio, linked groups, hover colors, overlay, height control, and a space-around justification option, plus admin defaults for new groups.
  * Version:     1.2.0
  * Author:      Phil Hoyt
  * License:     GPL-2.0-or-later
@@ -15,6 +15,8 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+define( 'GROUP_BLOCK_EXTENDED_VERSION', '1.2.0' );
 
 require_once __DIR__ . '/lib/plugin-update-checker/plugin-update-checker.php';
 
@@ -260,13 +262,15 @@ add_action(
 			(bool) get_option( 'group_block_extended_disable_content_width', false )
 		);
 
-		wp_localize_script(
+		wp_add_inline_script(
 			'group-block-extended-editor',
-			'groupBlockExtended',
-			array(
-				'defaultAlignment'    => $default_alignment,
-				'disableContentWidth' => $disable_content_width,
-			)
+			'window.groupBlockExtended = ' . wp_json_encode(
+				array(
+					'defaultAlignment'    => (string) $default_alignment,
+					'disableContentWidth' => (bool) $disable_content_width,
+				)
+			) . ';',
+			'before'
 		);
 	}
 );
@@ -300,17 +304,22 @@ add_action(
 );
 
 /**
- * Enqueue frontend styles.
+ * Register the frontend stylesheet as a block style so it is only loaded on
+ * pages that render a Group or Navigation block (block themes load block
+ * styles on demand; classic themes fall back to loading it on every page).
  */
 add_action(
-	'wp_enqueue_scripts',
+	'init',
 	function (): void {
-		wp_enqueue_style(
-			'group-block-extended',
-			plugin_dir_url( __FILE__ ) . 'style.css',
-			array(),
-			'1.1.0'
+		$style_args = array(
+			'handle' => 'group-block-extended',
+			'src'    => plugin_dir_url( __FILE__ ) . 'style.css',
+			'path'   => plugin_dir_path( __FILE__ ) . 'style.css',
+			'ver'    => GROUP_BLOCK_EXTENDED_VERSION,
 		);
+
+		wp_enqueue_block_style( 'core/group', $style_args );
+		wp_enqueue_block_style( 'core/navigation', $style_args );
 	}
 );
 
@@ -360,102 +369,73 @@ add_filter(
 
 		$attrs = $block['attrs'] ?? array();
 
-		// ── Hover Colors ──────────────────────────────────────────────────────────
-		$hover_text_color       = $attrs['hoverTextColor'] ?? '';
-		$hover_background_color = $attrs['hoverBackgroundColor'] ?? '';
-		$hover_link_color       = $attrs['hoverLinkColor'] ?? '';
+		// Collect wrapper classes and inline declarations, then apply them in a
+		// single pass to the .wp-block-group element (never the <a> wrapper that
+		// the editor writes around static linked groups).
+		$classes      = array();
+		$declarations = array();
 
-		$hover_color_vars = array_filter(
-			array(
-				'--hover-text-color'       => $hover_text_color,
-				'--hover-background-color' => $hover_background_color,
-				'--hover-link-color'       => $hover_link_color,
-			)
+		// ── Hover Colors ──────────────────────────────────────────────────────────
+		$hover_map = array(
+			'hoverTextColor'       => '--hover-text-color',
+			'hoverBackgroundColor' => '--hover-background-color',
+			'hoverLinkColor'       => '--hover-link-color',
 		);
 
-		$has_hover_colors = $hover_text_color || $hover_background_color || $hover_link_color;
-
-		if ( ! empty( $hover_color_vars ) ) {
-			$hover_processor = new WP_HTML_Tag_Processor( $block_content );
-
-			if ( $hover_processor->next_tag() ) {
-				if ( $has_hover_colors ) {
-					$hover_processor->add_class( 'has-hover-colors' );
-				}
-				if ( $hover_background_color ) {
-					$hover_processor->add_class( 'has-hover-bg-color' );
-				}
-
-				$existing_style = $hover_processor->get_attribute( 'style' ) ?? '';
-				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
-				$css_vars       = '';
-				foreach ( $hover_color_vars as $prop => $value ) {
-					$css_vars .= $prop . ': ' . $value . '; ';
-				}
-				$hover_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
-				$block_content = $hover_processor->get_updated_html();
+		foreach ( $hover_map as $attr_key => $css_prop ) {
+			$color = group_block_extended_sanitize_color( group_block_extended_attr_string( $attrs, $attr_key ) );
+			if ( '' !== $color ) {
+				$declarations[ $css_prop ] = $color;
 			}
 		}
 
+		if ( isset( $declarations['--hover-text-color'] ) || isset( $declarations['--hover-background-color'] ) || isset( $declarations['--hover-link-color'] ) ) {
+			$classes[] = 'has-hover-colors';
+		}
+		if ( isset( $declarations['--hover-background-color'] ) ) {
+			$classes[] = 'has-hover-bg-color';
+		}
+
 		// ── Overlay (default + hover state) ───────────────────────────────────────
-		$overlay_color         = $attrs['overlayColor'] ?? '';
-		$overlay_opacity       = isset( $attrs['overlayOpacity'] ) ? (int) $attrs['overlayOpacity'] : 50;
-		$overlay_hover_color   = $attrs['overlayHoverColor'] ?? '';
-		$overlay_hover_opacity = isset( $attrs['overlayHoverOpacity'] ) ? (int) $attrs['overlayHoverOpacity'] : 50;
+		$overlay_color = group_block_extended_sanitize_color( group_block_extended_attr_string( $attrs, 'overlayColor' ) );
 
 		if ( '' !== $overlay_color ) {
-			$overlay_processor = new WP_HTML_Tag_Processor( $block_content );
+			$classes[]                               = 'has-overlay';
+			$declarations['--overlay-color']         = $overlay_color;
+			$declarations['--overlay-opacity']       = group_block_extended_clamp_opacity( $attrs['overlayOpacity'] ?? 50 );
+			$declarations['--overlay-hover-opacity'] = group_block_extended_clamp_opacity( $attrs['overlayHoverOpacity'] ?? 50 );
 
-			if ( $overlay_processor->next_tag() ) {
-				$overlay_processor->add_class( 'has-overlay' );
-
-				$existing_style = $overlay_processor->get_attribute( 'style' ) ?? '';
-				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
-
-				$css_vars  = '--overlay-color: ' . $overlay_color . '; ';
-				$css_vars .= '--overlay-opacity: ' . $overlay_opacity . '; ';
-				$css_vars .= '--overlay-hover-opacity: ' . $overlay_hover_opacity . '; ';
-				if ( '' !== $overlay_hover_color ) {
-					$css_vars .= '--overlay-hover-color: ' . $overlay_hover_color . '; ';
-				}
-
-				$overlay_processor->set_attribute( 'style', $existing_style . $separator . trim( $css_vars ) );
-				$block_content = $overlay_processor->get_updated_html();
+			$overlay_hover_color = group_block_extended_sanitize_color( group_block_extended_attr_string( $attrs, 'overlayHoverColor' ) );
+			if ( '' !== $overlay_hover_color ) {
+				$declarations['--overlay-hover-color'] = $overlay_hover_color;
 			}
 		}
 
 		// ── Layout: Space Around ─────────────────────────────────────────────────
 		// WordPress core doesn't output CSS for justify-content: space-around, so
 		// we inject it as an inline style which overrides the generated layout class.
-		$layout          = $attrs['layout'] ?? array();
-		$justify_content = $layout['justifyContent'] ?? '';
+		$layout = is_array( $attrs['layout'] ?? null ) ? $attrs['layout'] : array();
 
-		if ( 'flex' === ( $layout['type'] ?? '' ) && 'space-around' === $justify_content ) {
-			$justify_processor = new WP_HTML_Tag_Processor( $block_content );
-
-			if ( $justify_processor->next_tag() ) {
-				$existing_style = $justify_processor->get_attribute( 'style' ) ?? '';
-				$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
-				$justify_processor->set_attribute( 'style', $existing_style . $separator . 'justify-content: space-around;' );
-				$block_content = $justify_processor->get_updated_html();
-			}
+		if ( 'flex' === ( $layout['type'] ?? '' ) && 'space-around' === ( $layout['justifyContent'] ?? '' ) ) {
+			$declarations['justify-content'] = 'space-around';
 		}
 
 		// ── Aspect Ratio ──────────────────────────────────────────────────────────
-		$aspect_ratio = $attrs['groupAspectRatio'] ?? '';
+		$css_value = group_block_extended_ratio_to_css( group_block_extended_attr_string( $attrs, 'groupAspectRatio' ) );
 
-		if ( '' !== $aspect_ratio ) {
-			$css_value = group_block_extended_ratio_to_css( $aspect_ratio );
+		if ( '' !== $css_value ) {
+			$declarations['aspect-ratio'] = $css_value;
+		}
 
-			if ( '' !== $css_value ) {
-				$processor = new WP_HTML_Tag_Processor( $block_content );
+		if ( ! empty( $classes ) || ! empty( $declarations ) ) {
+			$processor = new WP_HTML_Tag_Processor( $block_content );
 
-				if ( $processor->next_tag() ) {
-					$existing_style = $processor->get_attribute( 'style' ) ?? '';
-					$separator      = ( '' !== $existing_style && ! str_ends_with( trim( $existing_style ), ';' ) ) ? '; ' : '';
-					$processor->set_attribute( 'style', $existing_style . $separator . 'aspect-ratio: ' . $css_value . ';' );
-					$block_content = $processor->get_updated_html();
+			if ( $processor->next_tag( array( 'class_name' => 'wp-block-group' ) ) ) {
+				foreach ( $classes as $class_name ) {
+					$processor->add_class( $class_name );
 				}
+				group_block_extended_append_style( $processor, $declarations );
+				$block_content = $processor->get_updated_html();
 			}
 		}
 
@@ -535,6 +515,22 @@ add_filter(
  *                               (static link case) — preserves that outermost tag.
  */
 function group_block_extended_strip_nested_anchors( string $html, bool $has_outer_link = false ): string {
+	// Drop link-only attributes from every nested anchor so the resulting
+	// <span> elements are valid HTML. The outermost anchor is left untouched.
+	$processor = new WP_HTML_Tag_Processor( $html );
+	$index     = 0;
+
+	while ( $processor->next_tag( array( 'tag_name' => 'a' ) ) ) {
+		if ( $has_outer_link && 0 === $index++ ) {
+			continue;
+		}
+		foreach ( array( 'href', 'target', 'rel', 'download', 'hreflang', 'ping', 'referrerpolicy', 'type' ) as $attr ) {
+			$processor->remove_attribute( $attr );
+		}
+	}
+
+	$html = $processor->get_updated_html();
+
 	if ( $has_outer_link ) {
 		// Protect the outermost opening <a> (first occurrence).
 		$html = preg_replace( '/<a\b/', "\x00GBE_OPEN\x00", $html, 1 );
@@ -546,8 +542,16 @@ function group_block_extended_strip_nested_anchors( string $html, bool $has_oute
 		}
 	}
 
-	// Replace remaining <a …> with <span …> and </a> with </span>.
-	$html = preg_replace( '/<a\b([^>]*)>/i', '<span$1>', $html );
+	// Replace remaining <a …> with <span …> and </a> with </span>, collapsing
+	// the whitespace left behind by the removed attributes.
+	$html = preg_replace_callback(
+		'/<a\b([^>]*)>/i',
+		static function ( array $m ): string {
+			$attrs = trim( preg_replace( '/\s+/', ' ', $m[1] ) );
+			return '' === $attrs ? '<span>' : '<span ' . $attrs . '>';
+		},
+		$html
+	);
 	$html = preg_replace( '/<\/a>/i', '</span>', $html );
 
 	if ( $has_outer_link ) {
@@ -556,6 +560,94 @@ function group_block_extended_strip_nested_anchors( string $html, bool $has_oute
 	}
 
 	return $html;
+}
+
+/**
+ * Read a block attribute as a string, returning '' for anything non-scalar.
+ *
+ * Block comment JSON is user-controlled, so an attribute declared as a string
+ * may still arrive as an array or object.
+ *
+ * @param array  $attrs Block attributes.
+ * @param string $key   Attribute name.
+ */
+function group_block_extended_attr_string( array $attrs, string $key ): string {
+	$value = $attrs[ $key ] ?? '';
+
+	return is_scalar( $value ) ? (string) $value : '';
+}
+
+/**
+ * Validate a CSS color value before it is written into an inline style.
+ *
+ * Accepts hex, rgb()/rgba(), hsl()/hsla(), and theme palette references
+ * (var(--wp--preset--color--slug)). Anything else — including a value that
+ * tries to smuggle in extra declarations — returns ''.
+ *
+ * @param string $value Raw attribute value.
+ * @return string The validated color, or '' when invalid.
+ */
+function group_block_extended_sanitize_color( string $value ): string {
+	$value = trim( $value );
+
+	if ( '' === $value ) {
+		return '';
+	}
+
+	$pattern = '/^(?:'
+		. '#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})'
+		. '|rgba?\([\d\s.,%\/]+\)'
+		. '|hsla?\([\d\s.,%\/deg]+\)'
+		. '|var\(--wp--preset--color--[a-z0-9-]+\)'
+		. ')$/i';
+
+	return preg_match( $pattern, $value ) ? $value : '';
+}
+
+/**
+ * Clamp an opacity attribute to an integer between 0 and 100.
+ *
+ * @param mixed $value Raw attribute value.
+ */
+function group_block_extended_clamp_opacity( $value ): int {
+	if ( ! is_numeric( $value ) ) {
+		return 50;
+	}
+
+	return max( 0, min( 100, (int) $value ) );
+}
+
+/**
+ * Append CSS declarations to the current tag's style attribute, skipping any
+ * property that is already present (the editor's save filter writes the same
+ * declarations into saved HTML, so this keeps the output idempotent).
+ *
+ * @param WP_HTML_Tag_Processor    $processor    Processor positioned on the target tag.
+ * @param array<string,string|int> $declarations Map of CSS property => value.
+ */
+function group_block_extended_append_style( WP_HTML_Tag_Processor $processor, array $declarations ): void {
+	$existing = $processor->get_attribute( 'style' );
+	$existing = is_string( $existing ) ? trim( $existing ) : '';
+
+	$additions = array();
+
+	foreach ( $declarations as $prop => $value ) {
+		if ( '' !== $existing && preg_match( '/(?:^|;)\s*' . preg_quote( $prop, '/' ) . '\s*:/i', $existing ) ) {
+			continue;
+		}
+		$additions[] = $prop . ': ' . $value . ';';
+	}
+
+	if ( empty( $additions ) ) {
+		return;
+	}
+
+	$separator = '';
+	if ( '' !== $existing ) {
+		$separator = str_ends_with( $existing, ';' ) ? ' ' : '; ';
+	}
+
+	$processor->set_attribute( 'style', $existing . $separator . implode( ' ', $additions ) );
 }
 
 /**

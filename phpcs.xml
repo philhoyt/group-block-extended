@@ -4,6 +4,7 @@
 
 	<!-- Files to check -->
 	<file>group-block-extended.php</file>
+	<file>uninstall.php</file>
 
 	<!-- Exclude generated and third-party directories -->
 	<exclude-pattern>build/*</exclude-pattern>

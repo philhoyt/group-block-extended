@@ -16,7 +16,9 @@
 	transition: color 0.3s ease;
 }
 
-.wp-block-group.has-hover-colors:hover {
+.wp-block-group.has-hover-colors:hover,
+.wp-block-group.has-hover-colors:focus-within,
+.wp-block-group-link:focus-visible > .wp-block-group.has-hover-colors {
 	color: var(--hover-text-color, inherit) !important;
 }
 
@@ -24,7 +26,9 @@
 	transition: color 0.3s ease;
 }
 
-.wp-block-group.has-hover-colors:hover a {
+.wp-block-group.has-hover-colors:hover a,
+.wp-block-group.has-hover-colors:focus-within a,
+.wp-block-group-link:focus-visible > .wp-block-group.has-hover-colors a {
 	color: var(--hover-link-color, inherit) !important;
 }
 
@@ -32,7 +36,9 @@
 	transition: background-color 0.3s ease;
 }
 
-.wp-block-group.has-hover-bg-color:hover {
+.wp-block-group.has-hover-bg-color:hover,
+.wp-block-group.has-hover-bg-color:focus-within,
+.wp-block-group-link:focus-visible > .wp-block-group.has-hover-bg-color {
 	background-color: var(--hover-background-color) !important;
 }
 
@@ -52,7 +58,9 @@
 	z-index: -1;
 }
 
-.wp-block-group.has-overlay:hover::before {
+.wp-block-group.has-overlay:hover::before,
+.wp-block-group.has-overlay:focus-within::before,
+.wp-block-group-link:focus-visible > .wp-block-group.has-overlay::before {
 	background-color: var(--overlay-hover-color, var(--overlay-color));
 	opacity: calc(var(--overlay-hover-opacity, var(--overlay-opacity, 50)) / 100);
 	transition: background-color 0.3s ease, opacity 0.3s ease;

@@ -8,7 +8,7 @@ Requires PHP:      8.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Extends the core Group block with aspect ratio control, linked group functionality, hover color effects, and overlay support — non-destructively, with no block.json overrides.
+Extends the core Group block with aspect ratio, linked groups, hover colors, overlay, height control, and a space-around justification option. Everything is applied through filter hooks, with no block.json overrides.
 
 == Description ==
 
@@ -22,11 +22,11 @@ Presets: 1:1, 5:4, 4:3, 3:2, 16:9, 4:5, 3:4, 2:3, 9:16, or custom.
 
 = Linked Group =
 
-Turn any Group block into a clickable linked region — ideal for card components.
+Turn any Group block into a clickable linked region, which is ideal for card components.
 
-**Static link** — enter a URL directly. The group is wrapped in an `<a>` tag in saved HTML. Supports new tab, rel attributes, aria-label, and title.
+**Static link**: enter a URL directly. The group is wrapped in an `<a>` tag in saved HTML. Supports new tab, rel attributes, aria-label, and title.
 
-**Link to post** — available inside Query Loop. Dynamically links to the current post's permalink via a PHP render filter, keeping the permalink out of saved HTML so it stays up to date automatically.
+**Link to post**: available inside Query Loop. Dynamically links to the current post's permalink via a PHP render filter, keeping the permalink out of saved HTML so it stays up to date automatically.
 
 Both link modes automatically replace any nested `<a>` tags with `<span>` to prevent invalid HTML.
 
@@ -36,9 +36,19 @@ Apply color changes on hover. Set hover values for text, background, and links i
 
 = Overlay =
 
-Add a color overlay that sits behind the group's content — above the background but below text and nested blocks, matching the behavior of the core Cover block.
+Add a color overlay that sits behind the group's content, above the background but below text and nested blocks, matching the behavior of the core Cover block.
 
 Configure a default opacity and a separate hover opacity (and optionally a different hover color) to create smooth CSS transitions between states. Common use cases include a tint that darkens on hover, a color that reveals on hover, or a full color shift between states.
+
+Hover colors and the overlay also respond to keyboard focus, so linked groups give the same feedback when tabbed to.
+
+= Justification and Height =
+
+Group and Navigation blocks with a flex layout get a fifth justification option, **Space around**, in the toolbar. Group blocks also get a **Height** control next to Min. Height in the Dimensions panel.
+
+= Defaults for New Groups =
+
+Under **Settings → Group Block Extended**, choose a default alignment (none, wide, or full) and whether new Group blocks start with "Inner blocks use content width" turned off. Both can also be set in code with the `group_block_extended_default_alignment` and `group_block_extended_disable_content_width` filters.
 
 == Installation ==
 
@@ -56,7 +66,7 @@ No. All attributes are registered via the `block_type_metadata` filter and all o
 
 = Will this cause block validation errors on update? =
 
-No for aspect ratio and linked group — the save-element filter writes the same output as long as the same attributes are set. If you deactivate the plugin, blocks with a link or aspect ratio set will show a validation error, which can be resolved by removing those attributes before deactivating.
+No for aspect ratio and linked group: the save-element filter writes the same output as long as the same attributes are set. If you deactivate the plugin, blocks with a link or aspect ratio set will show a validation error, which can be resolved by removing those attributes before deactivating.
 
 = Can I nest linked groups? =
 

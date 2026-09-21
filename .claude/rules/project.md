@@ -17,5 +17,5 @@ paths:
 - WP minimum: 7.0
 - Distribution: GitHub (PUC) — release workflow in .github/workflows/release.yml, tags are v-prefixed
 - Main file: `group-block-extended.php`
-- Version constant: none (version in plugin header only)
+- Version constant: `GROUP_BLOCK_EXTENDED_VERSION` (must match the plugin header on every release)
 - Note: WP 7.0 minimum is intentional — uses a feature not available before 7.0

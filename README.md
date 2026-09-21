@@ -1,6 +1,6 @@
 # Group Block Extended
 
-A WordPress plugin that extends the core Group block with aspect ratio control, linked group functionality, hover color effects, and overlay support.
+A WordPress plugin that extends the core Group block with aspect ratio control, linked groups, hover colors, overlay, height control, a space-around justification option, and admin-configurable defaults for new groups.
 
 ## Features
 
@@ -33,6 +33,14 @@ Configure a default opacity and a separate hover opacity (and optionally a diffe
 - No overlay at rest that reveals a color on hover
 - Color shift on hover (e.g. blue → red)
 
+Hover colors and the overlay also respond to keyboard focus on linked groups.
+
+### Justification and Height
+Group and Navigation blocks with a flex layout get a fifth justification option, **Space around**. Group blocks also get a **Height** control next to Min. Height in the Dimensions panel.
+
+### Defaults for New Groups
+**Settings → Group Block Extended** lets you set a default alignment and turn off "Inner blocks use content width" for new Group blocks. The same defaults are available as filters: `group_block_extended_default_alignment` and `group_block_extended_disable_content_width`.
+
 ## Installation
 
 Download the latest release zip and install via **Plugins → Add New → Upload Plugin**, or unzip into `wp-content/plugins/group-block-extended/`.
@@ -49,8 +57,19 @@ npm run start        # watch mode
 
 ```bash
 npm run lint:js      # ESLint via @wordpress/scripts
+npm run lint:css     # Stylelint
 npm run lint:php     # PHPCS with WordPress Coding Standards
 npm run lint:php:fix # Auto-fix PHPCS violations
+composer analyse     # PHPStan
+```
+
+### Testing
+
+```bash
+npm run test:unit    # Jest — save-element transform and link sanitizers
+npm run env:start    # wp-env (Docker) for the suites below
+npm run test:php     # PHPUnit integration tests inside wp-env
+npm run test:e2e     # Playwright editor tests against the wp-env tests site
 ```
 
 ### Packaging

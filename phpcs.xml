@@ -3,7 +3,10 @@
 	<description>WordPress Coding Standards for Group Block Extended plugin.</description>
 
 	<!-- Files to check -->
+	<arg name="extensions" value="php"/>
 	<file>group-block-extended.php</file>
+	<file>uninstall.php</file>
+	<file>tests</file>
 
 	<!-- Exclude generated and third-party directories -->
 	<exclude-pattern>build/*</exclude-pattern>
@@ -13,6 +16,17 @@
 
 	<!-- WordPress Coding Standards -->
 	<rule ref="WordPress"/>
+
+	<!-- Test methods are self-describing; do not require a docblock on each one. -->
+	<rule ref="Squiz.Commenting.FunctionComment.Missing">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
+	<rule ref="Generic.Commenting.DocComment.MissingShort">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 
 	<!-- Plugin-specific configuration -->
 	<config name="minimum_supported_wp_version" value="7.0"/>

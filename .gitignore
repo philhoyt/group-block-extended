@@ -13,3 +13,9 @@ plans/
 
 # PHPUnit
 .phpunit.result.cache
+
+# wp-env — machine-specific port overrides
+.wp-env.override.json
+
+# Playwright output
+artifacts/

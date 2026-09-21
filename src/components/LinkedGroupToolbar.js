@@ -1,10 +1,6 @@
-import { useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-	BlockControls,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalLinkControl as LinkControl,
-} from '@wordpress/block-editor';
+import { BlockControls, LinkControl } from '@wordpress/block-editor';
 import {
 	ToolbarButton,
 	Popover,
@@ -13,11 +9,22 @@ import {
 import { link, linkOff } from '@wordpress/icons';
 import { rawShortcut, displayShortcut } from '@wordpress/keycodes';
 
+import { sanitizeLinkUrl } from '../utils/link';
+
+/**
+ * Toolbar link button + popover. Only mount this for the selected block: the
+ * keyboard shortcuts bind to document, not to the block.
+ *
+ * @param {Object}   props
+ * @param {Object}   props.attributes
+ * @param {Function} props.setAttributes
+ */
 export default function LinkedGroupToolbar( { attributes, setAttributes } ) {
 	const { groupLinkUrl, groupLinkNewTab, groupLinkToPost } = attributes;
 
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ popoverAnchor, setAnchor ] = useState( null );
+	const buttonRef = useRef( null );
 
 	const isLinked = !! ( groupLinkUrl || groupLinkToPost );
 	// Query Loop links are managed only from the sidebar panel.
@@ -25,9 +32,15 @@ export default function LinkedGroupToolbar( { attributes, setAttributes } ) {
 
 	function handleLinkChange( value ) {
 		setAttributes( {
-			groupLinkUrl: value?.url ?? '',
+			groupLinkUrl: sanitizeLinkUrl( value?.url ),
 			groupLinkNewTab: value?.opensInNewTab ?? false,
 		} );
+	}
+
+	function closePopover() {
+		setIsOpen( false );
+		// Return focus to the control that opened the popover.
+		buttonRef.current?.focus();
 	}
 
 	function handleRemove() {
@@ -67,6 +80,7 @@ export default function LinkedGroupToolbar( { attributes, setAttributes } ) {
 			<BlockControls group="block">
 				<span ref={ setAnchor }>
 					<ToolbarButton
+						ref={ buttonRef }
 						icon={ isLinked ? linkOff : link }
 						label={
 							isLinked
@@ -88,7 +102,7 @@ export default function LinkedGroupToolbar( { attributes, setAttributes } ) {
 				<Popover
 					placement="bottom"
 					anchor={ popoverAnchor }
-					onClose={ () => setIsOpen( false ) }
+					onClose={ closePopover }
 					focusOnMount={ true }
 					shift
 				>

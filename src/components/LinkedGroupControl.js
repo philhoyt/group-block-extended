@@ -8,12 +8,26 @@ import {
 	ExternalLink,
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 import {
 	store as blockEditorStore,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalLinkControl as LinkControl,
+	LinkControl,
 } from '@wordpress/block-editor';
 import { useEntityProp } from '@wordpress/core-data';
+
+import { sanitizeLinkUrl, sanitizeRel } from '../utils/link';
+
+/**
+ * Block names that provide a post context for "Link to post".
+ *
+ * Filter `groupBlockExtended.queryBlocks` to add other query-style blocks.
+ */
+function getQueryBlockNames() {
+	return applyFilters( 'groupBlockExtended.queryBlocks', [
+		'core/query',
+		'blockendar/events-query',
+	] );
+}
 
 export default function LinkedGroupControl( {
 	clientId,
@@ -40,6 +54,7 @@ export default function LinkedGroupControl( {
 			const { getBlockParents, getBlock, getClientIdsOfDescendants } =
 				select( blockEditorStore );
 			const parents = getBlockParents( clientId, /* ascending */ true );
+			const queryBlockNames = getQueryBlockNames();
 
 			let insideQuery = false;
 			let linkedAncestor = false;
@@ -49,10 +64,7 @@ export default function LinkedGroupControl( {
 				if ( ! parent ) {
 					continue;
 				}
-				if (
-					parent.name === 'core/query' ||
-					parent.name === 'blockendar/events-query'
-				) {
+				if ( queryBlockNames.includes( parent.name ) ) {
 					insideQuery = true;
 				}
 				if (
@@ -106,7 +118,7 @@ export default function LinkedGroupControl( {
 
 	function handleLinkChange( value ) {
 		setAttributes( {
-			groupLinkUrl: value?.url ?? '',
+			groupLinkUrl: sanitizeLinkUrl( value?.url ),
 			groupLinkNewTab: value?.opensInNewTab ?? false,
 		} );
 	}
@@ -165,7 +177,7 @@ export default function LinkedGroupControl( {
 											? {
 													groupLinkUrl: '',
 													groupLinkNewTab: false,
-											  }
+												}
 											: {} ),
 									} );
 								} }
@@ -215,7 +227,7 @@ export default function LinkedGroupControl( {
 										? __(
 												'Defaults to post title',
 												'group-block-extended'
-										  )
+											)
 										: ''
 								}
 								help={ __(
@@ -255,7 +267,9 @@ export default function LinkedGroupControl( {
 									'group-block-extended'
 								) }
 								onChange={ ( value ) =>
-									setAttributes( { groupLinkRel: value } )
+									setAttributes( {
+										groupLinkRel: sanitizeRel( value ),
+									} )
 								}
 							/>
 

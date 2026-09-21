@@ -365,8 +365,6 @@ add_filter(
 add_filter(
 	'render_block_core/group',
 	function ( string $block_content, array $block ): string {
-		static $link_depth = 0;
-
 		$attrs = $block['attrs'] ?? array();
 
 		// Collect wrapper classes and inline declarations, then apply them in a
@@ -450,7 +448,10 @@ add_filter(
 		}
 
 		// ── Link to Post (Query Loop) ─────────────────────────────────────────────
-		if ( ! $link_to_post || $link_depth > 0 ) {
+		// Inner blocks render before their parents, so a nested linked group has
+		// already been wrapped by the time this runs; the strip below turns that
+		// inner <a> into a <span>, leaving only the outermost group as a link.
+		if ( ! $link_to_post ) {
 			return $block_content;
 		}
 
@@ -496,11 +497,7 @@ add_filter(
 		$link_open  = '<a href="' . esc_url( $permalink ) . '" class="wp-block-group-link"' . $target_attr . $rel_attr . $aria_attr . $title_attr . '>';
 		$link_close = '</a>';
 
-		$link_depth++;
-		$output = $link_open . $block_content . $link_close;
-		$link_depth--;
-
-		return $output;
+		return $link_open . $block_content . $link_close;
 	},
 	10,
 	2

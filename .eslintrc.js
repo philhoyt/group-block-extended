@@ -10,4 +10,14 @@ module.exports = {
 	rules: {
 		// Project-specific overrides
 	},
+	overrides: [
+		{
+			files: [ '**/__tests__/**/*.js', '**/*.test.js' ],
+			extends: [ 'plugin:@wordpress/eslint-plugin/test-unit' ],
+		},
+		{
+			files: [ 'tests/e2e/**/*.js' ],
+			extends: [ 'plugin:@wordpress/eslint-plugin/test-playwright' ],
+		},
+	],
 };

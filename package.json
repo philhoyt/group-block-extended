@@ -25,10 +25,12 @@
     "style.css"
   ],
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@wordpress/env": "^10.39.0",
     "@wordpress/eslint-plugin": "^22.22.0",
     "@wordpress/icons": "^11.8.0",
     "@wordpress/scripts": "^30.0.0",
-    "@wordpress/stylelint-config": "^23.42.0"
+    "@wordpress/stylelint-config": "^23.42.0",
+    "@wordpress/url": "^4.55.0"
   }
 }

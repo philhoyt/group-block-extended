@@ -24,3 +24,7 @@ phpstan.neon
 phpunit.xml
 CLAUDE.md
 README.md
+artifacts
+playwright.config.js
+.wp-env.override.json
+.phpunit.result.cache

@@ -28,7 +28,10 @@ $group_block_extended_update_checker = PucFactory::buildUpdateChecker(
 	__FILE__,
 	'group-block-extended'
 );
-$group_block_extended_update_checker->getVcsApi()->enableReleaseAssets();
+$group_block_extended_vcs_api        = $group_block_extended_update_checker->getVcsApi();
+if ( method_exists( $group_block_extended_vcs_api, 'enableReleaseAssets' ) ) {
+	$group_block_extended_vcs_api->enableReleaseAssets();
+}
 
 /**
  * Register custom attributes and context on core/group via block_type_metadata filter.

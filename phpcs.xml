@@ -3,6 +3,7 @@
 	<description>WordPress Coding Standards for Group Block Extended plugin.</description>
 
 	<!-- Files to check -->
+	<arg name="extensions" value="php"/>
 	<file>group-block-extended.php</file>
 	<file>uninstall.php</file>
 	<file>tests</file>

@@ -24,6 +24,13 @@ const LINKED_GROUPS = `<!-- wp:group {"groupLinkUrl":"https://example.com/one","
 <!-- /wp:spacer -->`;
 
 test.describe( 'Group Block Extended', () => {
+	// The PHPUnit suite reinstalls the tests database, which deactivates
+	// plugins on the tests site, so activate explicitly rather than relying on
+	// .wp-env.json having done it.
+	test.beforeAll( async ( { requestUtils } ) => {
+		await requestUtils.activatePlugin( 'group-block-extended' );
+	} );
+
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );

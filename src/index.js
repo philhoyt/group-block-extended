@@ -1,4 +1,5 @@
 import { addFilter } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 import { InspectorControls, BlockControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { cloneElement, createElement } from '@wordpress/element';
@@ -125,16 +126,28 @@ const spaceAroundIcon = (
 );
 
 const JUSTIFY_OPTIONS = [
-	{ title: 'Justify items left', icon: justifyLeft, value: 'left' },
-	{ title: 'Justify items center', icon: justifyCenter, value: 'center' },
-	{ title: 'Justify items right', icon: justifyRight, value: 'right' },
 	{
-		title: 'Space between items',
+		title: __( 'Justify items left', 'group-block-extended' ),
+		icon: justifyLeft,
+		value: 'left',
+	},
+	{
+		title: __( 'Justify items center', 'group-block-extended' ),
+		icon: justifyCenter,
+		value: 'center',
+	},
+	{
+		title: __( 'Justify items right', 'group-block-extended' ),
+		icon: justifyRight,
+		value: 'right',
+	},
+	{
+		title: __( 'Space between items', 'group-block-extended' ),
 		icon: justifySpaceBetween,
 		value: 'space-between',
 	},
 	{
-		title: 'Space around items',
+		title: __( 'Space around items', 'group-block-extended' ),
 		icon: spaceAroundIcon,
 		value: 'space-around',
 	},
@@ -155,7 +168,8 @@ addFilter(
 				return <BlockEdit { ...props } />;
 			}
 
-			const { clientId, attributes, setAttributes, context } = props;
+			const { clientId, attributes, setAttributes, context, isSelected } =
+				props;
 			const layout = attributes.layout ?? {};
 			// Navigation is always flex; group must opt in via layout.type.
 			const isFlexLayout = isNav || layout.type === 'flex';
@@ -172,7 +186,10 @@ addFilter(
 											o.value === layout.justifyContent
 									)?.icon ?? justifyLeft
 								}
-								label="Change items justification"
+								label={ __(
+									'Change items justification',
+									'group-block-extended'
+								) }
 								controls={ JUSTIFY_OPTIONS.map(
 									( option ) => ( {
 										title: option.title,
@@ -198,10 +215,15 @@ addFilter(
 					) }
 					{ isGroup && (
 						<>
-							<LinkedGroupToolbar
-								attributes={ attributes }
-								setAttributes={ setAttributes }
-							/>
+							{ /* Only the selected block mounts the toolbar: its keyboard
+							     shortcuts bind to document and must not fire for every
+							     Group in the post. */ }
+							{ isSelected && (
+								<LinkedGroupToolbar
+									attributes={ attributes }
+									setAttributes={ setAttributes }
+								/>
+							) }
 							<InspectorControls group="styles">
 								<AspectRatioControl
 									clientId={ clientId }
@@ -282,6 +304,8 @@ addFilter(
 				overlayOpacity,
 				overlayHoverColor,
 				overlayHoverOpacity,
+				groupLinkUrl,
+				groupLinkToPost,
 				layout: blockLayout,
 			} = props.attributes;
 			const cssValue = groupAspectRatio
@@ -292,8 +316,15 @@ addFilter(
 			const isSpaceAround =
 				blockLayout?.type === 'flex' &&
 				blockLayout?.justifyContent === 'space-around';
+			const isLinked = !! ( groupLinkUrl || groupLinkToPost );
 
-			if ( ! cssValue && ! hasHover && ! hasOv && ! isSpaceAround ) {
+			if (
+				! cssValue &&
+				! hasHover &&
+				! hasOv &&
+				! isSpaceAround &&
+				! isLinked
+			) {
 				return <BlockListBlock { ...props } />;
 			}
 
@@ -331,9 +362,17 @@ addFilter(
 					hoverBackgroundColor ? 'has-hover-bg-color' : '',
 					hasOv ? 'has-overlay' : '',
 					isSpaceAround ? 'gbe-justify-space-around' : '',
+					isLinked ? 'is-group-linked' : '',
 				]
 					.filter( Boolean )
 					.join( ' ' ),
+				// Read by editor.scss for the "Linked" badge so the label is translatable.
+				...( isLinked && {
+					'data-gbe-linked-label': __(
+						'Linked',
+						'group-block-extended'
+					),
+				} ),
 			};
 
 			return (

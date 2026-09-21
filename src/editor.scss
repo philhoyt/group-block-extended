@@ -43,17 +43,7 @@
 	}
 }
 
-// Fade background to transparent on hover — live preview in the editor canvas.
-.wp-block-group.has-hover-bg-transparent {
-	transition: background-color 0.3s ease;
-
-	&:hover {
-		background-color: transparent !important;
-	}
-}
-
 // Overlay (default + hover state) — live preview in the editor canvas.
-// Must appear BEFORE the linked badge so the badge takes precedence via cascade.
 .wp-block-group.has-overlay {
 	position: relative;
 	isolation: isolate;
@@ -77,16 +67,16 @@
 }
 
 // Linked Group badge: shown inside the block wrapper in the editor to indicate
-// the group is linked. Placed AFTER the overlay rules so it wins when both
-// classes are present (same specificity, later rule wins).
+// the group is linked. Uses ::after so it can coexist with the overlay's ::before.
 .wp-block-group {
 
 	&.is-group-linked {
 		position: relative;
 
-		// Badge indicator — injected by the BlockEdit HOC when a link is set.
-		&::before {
-			content: "Linked";
+		// Badge indicator — the BlockListBlock filter adds the class and the
+		// translated label as data-gbe-linked-label.
+		&::after {
+			content: attr(data-gbe-linked-label);
 			position: absolute;
 			top: 4px;
 			right: 4px;

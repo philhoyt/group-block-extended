@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import {
 	PanelBody,
 	SelectControl,
@@ -58,16 +59,24 @@ export default function AspectRatioControl( {
 		[ clientId ]
 	);
 
-	const selectValue = getSelectValue( groupAspectRatio );
-	const isCustom = selectValue === 'custom';
+	const storedSelectValue = getSelectValue( groupAspectRatio );
+	// "Custom…" must stay selected while the text field is still empty, so
+	// track it locally rather than deriving it from the stored value alone.
+	const [ isCustomMode, setIsCustomMode ] = useState(
+		storedSelectValue === 'custom'
+	);
+	const isCustom = isCustomMode || storedSelectValue === 'custom';
+	const selectValue = isCustom ? 'custom' : storedSelectValue;
 
 	function handleSelectChange( value ) {
 		if ( value === 'custom' ) {
-			// Keep current custom value if already custom, otherwise clear.
-			setAttributes( {
-				groupAspectRatio: isCustom ? groupAspectRatio : '',
-			} );
+			setIsCustomMode( true );
+			// Keep an existing custom value; clear a preset so the field starts empty.
+			if ( storedSelectValue !== 'custom' ) {
+				setAttributes( { groupAspectRatio: '' } );
+			}
 		} else {
+			setIsCustomMode( false );
 			setAttributes( { groupAspectRatio: value } );
 		}
 	}
@@ -101,7 +110,7 @@ export default function AspectRatioControl( {
 				<TextControl
 					label={ __( 'Custom ratio', 'group-block-extended' ) }
 					value={ groupAspectRatio }
-					placeholder="e.g. 7:3"
+					placeholder={ __( 'e.g. 7:3', 'group-block-extended' ) }
 					help={ __(
 						'Enter a ratio like 7:3 or 5:2.',
 						'group-block-extended'

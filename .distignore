@@ -3,7 +3,7 @@
 .claude
 .gitignore
 .distignore
-.eslintrc.js
+eslint.config.js
 .stylelintrc.json
 .wp-env.json
 .vscode

@@ -177,7 +177,7 @@ export default function LinkedGroupControl( {
 											? {
 													groupLinkUrl: '',
 													groupLinkNewTab: false,
-											  }
+												}
 											: {} ),
 									} );
 								} }
@@ -227,7 +227,7 @@ export default function LinkedGroupControl( {
 										? __(
 												'Defaults to post title',
 												'group-block-extended'
-										  )
+											)
 										: ''
 								}
 								help={ __(

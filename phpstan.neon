@@ -6,8 +6,8 @@ parameters:
     paths:
         - group-block-extended.php
     excludePaths:
-        - vendor
-        - node_modules
-        - build
-        - lib
-        - tests
+        - vendor (?)
+        - node_modules (?)
+        - build (?)
+        - lib (?)
+        - tests (?)

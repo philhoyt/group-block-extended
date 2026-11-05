@@ -1,5 +1,7 @@
 # Group Block Extended
 
+[![CI](https://github.com/philhoyt/group-block-extended/actions/workflows/ci.yml/badge.svg)](https://github.com/philhoyt/group-block-extended/actions/workflows/ci.yml)
+
 A WordPress plugin that extends the core Group block with aspect ratio control, linked groups, hover colors, overlay, height control, a space-around justification option, and admin-configurable defaults for new groups.
 
 ## Features

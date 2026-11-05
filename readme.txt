@@ -3,7 +3,7 @@ Contributors:      philhoyt
 Tags:              block, group, aspect ratio, linked block, card, overlay, hover
 Requires at least: 7.0
 Tested up to:      7.1
-Stable tag:        1.3.0
+Stable tag:        1.3.1
 Requires PHP:      8.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -81,6 +81,9 @@ No. The "Link to post" toggle is only available when the Group block is inside a
 The overlay uses a separate pseudo-element layered above the group's background but below its content. This means you can set a background image on the group and add an overlay tint on top of it, with the text remaining fully visible above both. It also supports independent default and hover states with a CSS transition between them.
 
 == Changelog ==
+
+= 1.3.1 =
+* Change: Tested against WordPress 7.1 and rebuilt with the current block editor toolchain.
 
 = 1.3.0 =
 * Security: Hover and overlay colors are validated before they are written to the page. Only hex, rgb, hsl, and theme palette colors are accepted, so a crafted block attribute can no longer add other CSS to the group.

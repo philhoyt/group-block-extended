@@ -3,7 +3,7 @@ Contributors:      philhoyt
 Tags:              block, group, aspect-ratio, linked-group, overlay
 Requires at least: 7.0
 Tested up to:      7.1
-Stable tag:        1.3.1
+Stable tag:        1.3.2
 Requires PHP:      8.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -73,6 +73,10 @@ No. The toggle only appears when the Group is inside a Query Loop, and the optio
 The overlay is a pseudo-element layered above the group's background and below its content, so you can put a background image on the group and an overlay tint on top of it with the text still readable above both. It also has separate default and hover states with a transition between them.
 
 == Changelog ==
+
+= 1.3.2 =
+* Fixed the update checker so it always installs the release zip, not whichever file GitHub lists first.
+* Rewrote the readme files in plain English.
 
 = 1.3.1 =
 * Tested against WordPress 7.1 and rebuilt with the current block editor toolchain.
